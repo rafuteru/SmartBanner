@@ -16,8 +16,6 @@ kotlin {
         }
     }
     
-    // Removed iOS targets to focus on Android as requested
-    
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
@@ -35,6 +33,7 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.coil.compose)
+            implementation(libs.compose.icons)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

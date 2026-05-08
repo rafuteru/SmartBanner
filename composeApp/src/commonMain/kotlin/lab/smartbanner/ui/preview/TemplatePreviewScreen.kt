@@ -1,8 +1,10 @@
-package lab.smartbanner.ui.home
+package lab.smartbanner.ui.preview
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -10,13 +12,22 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-    onNavigateToPreview: (String) -> Unit
+fun TemplatePreviewScreen(
+    templateId: String,
+    onBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PosterWala") }
+                title = { Text("Template Preview") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -26,9 +37,7 @@ fun HomeScreen(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            Button(onClick = { onNavigateToPreview("sample_id") }) {
-                Text("Go to Template Preview")
-            }
+            Text("Previewing Template: $templateId")
         }
     }
 }
