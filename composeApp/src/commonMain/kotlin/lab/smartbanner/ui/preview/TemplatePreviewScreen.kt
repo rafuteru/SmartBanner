@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -173,15 +175,19 @@ private fun PreviewEditorContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 20.dp),
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
-
-            // Capture area - no internal padding to capture full poster
+            // Using a Box with shadow and explicit border for clear boundaries
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth(0.92f)
+                    .aspectRatio(posterAspectRatio)
+                    .shadow(8.dp, RoundedCornerShape(0.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(0.dp))
                     .drawWithContent {
+                        // Capture logic
                         graphicsLayer.record {
                             this@drawWithContent.drawContent()
                         }
@@ -201,8 +207,8 @@ private fun PreviewEditorContent(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(
-                topStart = 28.dp,
-                topEnd = 28.dp
+                topStart = 32.dp,
+                topEnd = 32.dp
             ),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp
@@ -210,18 +216,18 @@ private fun PreviewEditorContent(
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
+                    .padding(horizontal = 24.dp, vertical = 24.dp)
                     .fillMaxWidth()
             ) {
 
                 // Drag Handle
                 Box(
                     modifier = Modifier
-                        .width(42.dp)
+                        .width(40.dp)
                         .height(4.dp)
                         .background(
                             MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(50)
+                            RoundedCornerShape(2.dp)
                         )
                         .align(Alignment.CenterHorizontally)
                 )
@@ -245,6 +251,14 @@ private fun PreviewEditorContent(
                         val currentValue =
                             content.textMap[key] ?: element.text
 
+                        // Identify fields that typically contain multiline/long content
+                        val isMultilinePreference = key.contains("address", true) || 
+                                                  key.contains("footer", true) || 
+                                                  key.contains("discount", true) || 
+                                                  key.contains("offer", true) ||
+                                                  key.contains("exchange", true) ||
+                                                  key.contains("message", true)
+
                         OutlinedTextField(
                             value = currentValue,
                             onValueChange = {
@@ -265,29 +279,17 @@ private fun PreviewEditorContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(12.dp),
 
                             leadingIcon = {
                                 val icon = when {
-                                    key.contains(
-                                        "offer",
-                                        true
-                                    ) -> Icons.Default.LocalOffer
-
-                                    key.contains(
-                                        "shop",
-                                        true
-                                    ) -> Icons.Default.Store
-
-                                    key.contains(
-                                        "address",
-                                        true
-                                    ) ||
-                                            key.contains(
-                                                "footer",
-                                                true
-                                            ) -> Icons.Default.LocationOn
-
+                                    key.contains("offer", true) || 
+                                    key.contains("rate", true) || 
+                                    key.contains("discount", true) -> Icons.Default.LocalOffer
+                                    
+                                    key.contains("shop", true) -> Icons.Default.Store
+                                    key.contains("address", true) || key.contains("footer", true) -> Icons.Default.LocationOn
+                                    key.contains("owner", true) || key.contains("phone", true) -> Icons.Default.Person
                                     else -> Icons.Default.Edit
                                 }
 
@@ -298,17 +300,10 @@ private fun PreviewEditorContent(
                                 )
                             },
 
-                            minLines = if (
-                                key.contains("address", true) ||
-                                key.contains("footer", true) ||
-                                key.contains("message", true)
-                            ) 3 else 1,
-
-                            singleLine = !(
-                                    key.contains("address", true) ||
-                                            key.contains("footer", true) ||
-                                            key.contains("message", true)
-                                    )
+                            // Ensure multiline is supported for all fields, with extra space for long ones
+                            minLines = if (isMultilinePreference) 3 else 1,
+                            maxLines = 10,
+                            singleLine = false
                         )
                     }
 
