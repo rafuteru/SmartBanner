@@ -1,0 +1,51 @@
+{
+  "id": "jewellery_1",
+  "name": "Royal Gold Jewellery",
+  "category": "Jewellery",
+  "width": 1080.0,
+  "height": 1350.0,
+  "background": {
+    "color": "#FFF8E1"
+  },
+  "elements": [
+    {
+      "type": "banner",
+      "id": "header_banner",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1080.0,
+      "height": 200.0,
+      "zIndex": 1,
+      "color": "#8D6E63",
+      "alpha": 0.9
+    },
+    {
+      "type": "text",
+      "id": "shop_name",
+      "x": 0.0,
+      "y": 50.0,
+      "width": 1080.0,
+      "height": 100.0,
+      "zIndex": 2,
+      "text": "SHREE JEWELLERS",
+      "fontSize": 60.0,
+      "color": "#FFFFFF",
+      "fontWeight": "BOLD",
+      "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "x": 0.0,
+      "y": 300.0,
+      "width": 1080.0,
+      "height": 80.0,
+      "zIndex": 3,
+      "text": "Quality You Can Trust",
+      "fontSize": 40.0,
+      "color": "#8D6E63",
+      "fontWeight": "NORMAL",
+      "textAlign": "CENTER"
+    }
+  ]
+}
