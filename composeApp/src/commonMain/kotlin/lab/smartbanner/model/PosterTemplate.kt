@@ -44,8 +44,15 @@ data class TextElement(
     val text: String,
     val fontSize: Float = 24f,
     val color: String = "#000000",
-    val fontWeight: String = "NORMAL",
-    val textAlign: String = "CENTER",
+    val fontWeight: String = "NORMAL", // THIN, LIGHT, NORMAL, MEDIUM, BOLD, BLACK
+    val fontStyle: String = "NORMAL", // NORMAL, ITALIC
+    val textAlign: String = "CENTER", // START, CENTER, END, JUSTIFY
+    val fontFamily: String = "SANS_SERIF", // SANS_SERIF, SERIF, MONOSPACE
+    val textDecoration: String = "NONE", // NONE, UNDERLINE, LINE_THROUGH
+    val letterSpacing: Float = 0f,
+    val lineHeightMultiplier: Float = 1.2f,
+    val maxLines: Int? = null,
+    val overflow: String = "CLIP", // CLIP, ELLIPSIS, VISIBLE
     val contentKey: String? = null,
     val colorKey: String? = null
 ) : ElementConfig()
