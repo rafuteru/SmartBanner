@@ -12,6 +12,7 @@ import lab.smartbanner.navigation.Screen
 import lab.smartbanner.ui.home.HomeScreen
 import lab.smartbanner.ui.home.HomeViewModel
 import lab.smartbanner.ui.preview.TemplatePreviewScreen
+import lab.smartbanner.ui.preview.TemplatePreviewViewModel
 import lab.smartbanner.ui.theme.PosterWalaTheme
 
 @Composable
@@ -38,8 +39,12 @@ fun App() {
             
             composable<Screen.TemplatePreview> { backStackEntry ->
                 val route: Screen.TemplatePreview = backStackEntry.toRoute()
+                val previewViewModel: TemplatePreviewViewModel = viewModel {
+                    TemplatePreviewViewModel(LocalTemplateRepository())
+                }
                 TemplatePreviewScreen(
                     templateId = route.templateId,
+                    viewModel = previewViewModel,
                     onBack = { navController.popBackStack() }
                 )
             }

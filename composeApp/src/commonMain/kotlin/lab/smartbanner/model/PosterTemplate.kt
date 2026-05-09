@@ -3,6 +3,19 @@ package lab.smartbanner.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a complete poster template configuration.
+ * Templates are JSON-driven and designed to be rendered dynamically on a canvas.
+ *
+ * @property id Unique identifier for the template.
+ * @property name Display name of the template.
+ * @property category Template category (e.g., Jewellery, Grocery, Festival).
+ * @property previewUrl URL or path to the preview image of this template.
+ * @property width Reference width of the poster used for scaling calculations.
+ * @property height Reference height of the poster.
+ * @property background Configuration for the poster's background layer.
+ * @property elements List of dynamic elements (text, images, banners) to be rendered.
+ */
 @Serializable
 data class PosterTemplate(
     val id: String,
@@ -15,12 +28,19 @@ data class PosterTemplate(
     val elements: List<ElementConfig> = emptyList()
 )
 
+/**
+ * Configuration for the poster background.
+ */
 @Serializable
 data class BackgroundConfig(
     val color: String = "#FFFFFF",
     val imageUrl: String? = null
 )
 
+/**
+ * Base configuration for all renderable elements on the poster canvas.
+ * All positions and dimensions are relative to the [PosterTemplate.width] and [PosterTemplate.height].
+ */
 @Serializable
 sealed class ElementConfig {
     abstract val id: String
@@ -31,6 +51,9 @@ sealed class ElementConfig {
     abstract val zIndex: Int
 }
 
+/**
+ * Configuration for rendering text elements.
+ */
 @Serializable
 @SerialName("text")
 data class TextElement(
@@ -47,6 +70,9 @@ data class TextElement(
     val textAlign: String = "CENTER"   // START, CENTER, END
 ) : ElementConfig()
 
+/**
+ * Configuration for rendering image elements.
+ */
 @Serializable
 @SerialName("image")
 data class ImageElement(
@@ -60,6 +86,9 @@ data class ImageElement(
     val cornerRadius: Float = 0f
 ) : ElementConfig()
 
+/**
+ * Configuration for rendering solid color banners or shapes.
+ */
 @Serializable
 @SerialName("banner")
 data class BannerElement(
