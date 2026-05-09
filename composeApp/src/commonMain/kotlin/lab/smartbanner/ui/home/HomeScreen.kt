@@ -1,5 +1,6 @@
 package lab.smartbanner.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,15 +24,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.model.PosterTemplate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onNavigateToPreview: (String) -> Unit
+    onNavigateToPreview: (String) -> Unit,
+    onResumeDraft: (PosterDraft) -> Unit
 ) {
     val uiState = viewModel.uiState
+    val latestDraft by viewModel.latestDraft.collectAsState()
 
     Scaffold(
         topBar = {
@@ -57,35 +63,77 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (val state = uiState) {
-                is HomeUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is HomeUiState.Error -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
+            // Draft Resume Card
+            AnimatedVisibility(visible = latestDraft != null) {
+                latestDraft?.let { draft ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
                     ) {
-                        Text(state.message, color = MaterialTheme.colorScheme.error)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { viewModel.loadTemplates() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Retry")
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                            Spacer(Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Continue editing?",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    "You have an unsaved draft.",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            IconButton(onClick = { viewModel.clearDraft() }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear Draft")
+                            }
+                            Button(onClick = { onResumeDraft(draft) }) {
+                                Text("Resume")
+                            }
                         }
                     }
                 }
-                is HomeUiState.Success -> {
-                    HomeContent(
-                        state = state,
-                        onCategorySelect = { viewModel.selectCategory(it) },
-                        onTemplateClick = { template -> onNavigateToPreview(template.id) }
-                    )
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                when (val state = uiState) {
+                    is HomeUiState.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    is HomeUiState.Error -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(state.message, color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.loadTemplates() }) {
+                                Icon(Icons.Default.Refresh, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Retry")
+                            }
+                        }
+                    }
+                    is HomeUiState.Success -> {
+                        HomeContent(
+                            state = state,
+                            onCategorySelect = { viewModel.selectCategory(it) },
+                            onTemplateClick = { template -> onNavigateToPreview(template.id) }
+                        )
+                    }
                 }
             }
         }

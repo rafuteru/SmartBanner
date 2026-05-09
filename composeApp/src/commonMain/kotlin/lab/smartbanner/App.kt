@@ -1,19 +1,23 @@
 package lab.smartbanner
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import lab.smartbanner.data.DataStoreDraftRepository
 import lab.smartbanner.data.LocalTemplateRepository
+import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.navigation.Screen
 import lab.smartbanner.ui.home.HomeScreen
 import lab.smartbanner.ui.home.HomeViewModel
 import lab.smartbanner.ui.preview.TemplatePreviewScreen
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
 import lab.smartbanner.ui.theme.PosterWalaTheme
+import lab.smartbanner.utils.createDataStore
 
 @Composable
 @Preview
@@ -21,18 +25,28 @@ fun App() {
     PosterWalaTheme {
         val navController = rememberNavController()
         
+        // Dependency Injection (Manual for now, keeping it KMP-ready)
+        val context = LocalContext.current
+        val dataStore = remember { createDataStore(context) }
+        val templateRepository = remember { LocalTemplateRepository() }
+        val draftRepository = remember { DataStoreDraftRepository(dataStore) }
+
         NavHost(
             navController = navController,
             startDestination = Screen.Home
         ) {
             composable<Screen.Home> {
                 val homeViewModel: HomeViewModel = viewModel {
-                    HomeViewModel(LocalTemplateRepository())
+                    HomeViewModel(templateRepository, draftRepository)
                 }
+                
                 HomeScreen(
                     viewModel = homeViewModel,
                     onNavigateToPreview = { templateId ->
                         navController.navigate(Screen.TemplatePreview(templateId))
+                    },
+                    onResumeDraft = { draft: PosterDraft ->
+                        navController.navigate(Screen.TemplatePreview(draft.templateId))
                     }
                 )
             }
@@ -40,8 +54,20 @@ fun App() {
             composable<Screen.TemplatePreview> { backStackEntry ->
                 val route: Screen.TemplatePreview = backStackEntry.toRoute()
                 val previewViewModel: TemplatePreviewViewModel = viewModel {
-                    TemplatePreviewViewModel(LocalTemplateRepository())
+                    TemplatePreviewViewModel(templateRepository, draftRepository)
                 }
+                
+                val draft by draftRepository.getLatestDraft().collectAsState(null)
+                
+                LaunchedEffect(route.templateId, draft) {
+                    val initialContent = if (draft?.templateId == route.templateId) {
+                        draft?.content
+                    } else {
+                        null
+                    }
+                    previewViewModel.loadTemplate(route.templateId, initialContent)
+                }
+
                 TemplatePreviewScreen(
                     templateId = route.templateId,
                     viewModel = previewViewModel,
