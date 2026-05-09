@@ -55,7 +55,8 @@ fun TemplatePreviewScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    val title = (uiState as? PreviewUiState.Success)?.template?.name ?: "Edit Poster"
+                    val title =
+                        (uiState as? PreviewUiState.Success)?.template?.name ?: "Edit Poster"
                     Text(
                         title,
                         style = MaterialTheme.typography.titleMedium,
@@ -88,18 +89,22 @@ fun TemplatePreviewScreen(
                     ) {
                         Icon(Icons.Default.Download, contentDescription = "Export")
                     }
-                    
+
                     Button(
-                        onClick = { 
+                        onClick = {
                             scope.launch {
                                 viewModel.completeEditing()
-                                onBack() 
+                                onBack()
                             }
                         },
                         modifier = Modifier.padding(end = 8.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(Modifier.width(8.dp))
                         Text("Done")
                     }
@@ -122,9 +127,13 @@ fun TemplatePreviewScreen(
                         CircularProgressIndicator(strokeWidth = 3.dp)
                     }
                 }
+
                 is PreviewUiState.Error -> {
-                    PreviewErrorState(message = state.message, onRetry = { viewModel.loadTemplate(templateId) })
+                    PreviewErrorState(
+                        message = state.message,
+                        onRetry = { viewModel.loadTemplate(templateId) })
                 }
+
                 is PreviewUiState.Success -> {
                     PreviewEditorContent(
                         state = state,
@@ -148,7 +157,7 @@ private fun PreviewEditorContent(
     val scrollState = rememberScrollState()
 
     val posterAspectRatio = remember(template.width, template.height) {
-        template.width.toFloat() / template.height.toFloat()
+        template.width / template.height
     }
 
     Column(
@@ -168,38 +177,25 @@ private fun PreviewEditorContent(
             contentAlignment = Alignment.Center
         ) {
 
-            Card(
+            // Capture area - no internal padding to capture full poster
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .aspectRatio(posterAspectRatio),
-                shape = RoundedCornerShape(18.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 8.dp
-                ),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
-
-                // Capture area - no internal padding to capture full poster
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .drawWithContent {
-                            graphicsLayer.record {
-                                this@drawWithContent.drawContent()
-                            }
-                            drawContent()
+                    .fillMaxSize()
+                    .drawWithContent {
+                        graphicsLayer.record {
+                            this@drawWithContent.drawContent()
                         }
-                ) {
-                    PosterRenderer(
-                        template = template,
-                        content = content,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                        drawContent()
+                    }
+            ) {
+                PosterRenderer(
+                    template = template,
+                    content = content,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
+
 
         // Editor Controls
         Surface(
@@ -352,15 +348,15 @@ private fun PreviewErrorState(message: String, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            Icons.Default.ErrorOutline, 
-            contentDescription = null, 
-            modifier = Modifier.size(48.dp), 
+            Icons.Default.ErrorOutline,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = message, 
-            style = MaterialTheme.typography.bodyMedium, 
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))

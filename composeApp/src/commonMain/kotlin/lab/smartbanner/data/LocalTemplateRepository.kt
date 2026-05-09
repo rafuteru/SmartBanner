@@ -12,14 +12,15 @@ class LocalTemplateRepository : TemplateRepository {
         coerceInputValues = true
     }
 
-    // Paths are relative to the 'files' directory in composeResources
+    // Paths are relative to the composeResources root.
+    // Our files are in src/commonMain/composeResources/files/templates/
     private val templatePaths = listOf(
-        "templates/jewellery_1.json",
-        "templates/jewellery_2.json",
-        "templates/festival_1.json",
-        "templates/clothing_1.json",
-        "templates/grocery_1.json",
-        "templates/coaching_1.json"
+        "files/templates/jewellery_1.json",
+        "files/templates/jewellery_2.json",
+        "files/templates/festival_1.json",
+        "files/templates/clothing_1.json",
+        "files/templates/grocery_1.json",
+        "files/templates/coaching_1.json"
     )
 
     @OptIn(ExperimentalResourceApi::class)
