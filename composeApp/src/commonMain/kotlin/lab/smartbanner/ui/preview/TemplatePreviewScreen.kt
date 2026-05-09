@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import lab.smartbanner.model.TextElement
 import lab.smartbanner.renderer.PosterRenderer
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,12 +32,11 @@ fun TemplatePreviewScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(templateId) {
-        viewModel.loadTemplate(templateId)
-    }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -48,19 +48,40 @@ fun TemplatePreviewScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        scope.launch {
+                            viewModel.saveCurrentDraft()
+                            onBack()
+                        }
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
+                    // Export Button
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Exporting image... (Feature coming soon)")
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Download, contentDescription = "Export")
+                    }
+                    
                     Button(
-                        onClick = { /* Save action */ },
+                        onClick = { 
+                            scope.launch {
+                                viewModel.completeEditing()
+                                onBack() 
+                            }
+                        },
                         modifier = Modifier.padding(end = 8.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Save")
+                        Text("Done")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -70,15 +91,12 @@ fun TemplatePreviewScreen(
             )
         }
     ) { paddingValues ->
-        AnimatedContent(
-            targetState = uiState,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "PreviewContentTransition",
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) { state ->
-            when (state) {
+        ) {
+            when (val state = uiState) {
                 is PreviewUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(strokeWidth = 3.dp)
@@ -107,99 +125,170 @@ private fun PreviewEditorContent(
     val content = state.content
     val scrollState = rememberScrollState()
 
+    val posterAspectRatio = remember(template.width, template.height) {
+        template.width.toFloat() / template.height.toFloat()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+            )
     ) {
-        // Poster Preview Area
+
+        // Poster Preview Section
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 20.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
+
+            Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                shape = RoundedCornerShape(12.dp),
-                shadowElevation = 8.dp,
-                color = Color.White
-            ) {
-                PosterRenderer(
-                    template = template,
-                    content = content,
-                    modifier = Modifier.fillMaxWidth()
+                    .fillMaxWidth(0.9f)
+                    .aspectRatio(posterAspectRatio),
+                shape = RoundedCornerShape(18.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 8.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
                 )
+            ) {
+
+                // Fixed canvas renderer
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    PosterRenderer(
+                        template = template,
+                        content = content,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
 
         // Editor Controls
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp
+            ),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp
         ) {
+
             Column(
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = 20.dp)
                     .fillMaxWidth()
             ) {
+
                 // Drag Handle
                 Box(
                     modifier = Modifier
-                        .width(40.dp)
+                        .width(42.dp)
                         .height(4.dp)
                         .background(
                             MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(2.dp)
+                            RoundedCornerShape(50)
                         )
                         .align(Alignment.CenterHorizontally)
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
 
-                SectionHeader("Poster Content", Icons.Default.TextFields)
+                SectionHeader(
+                    title = "Poster Content",
+                    icon = Icons.Default.TextFields
+                )
+
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Dynamically generate text fields for editable elements
                 template.elements
                     .filterIsInstance<TextElement>()
                     .filter { it.contentKey != null }
                     .distinctBy { it.contentKey }
                     .forEach { element ->
+
                         val key = element.contentKey!!
-                        val currentValue = content.textMap[key] ?: element.text
-                        
+                        val currentValue =
+                            content.textMap[key] ?: element.text
+
                         OutlinedTextField(
                             value = currentValue,
-                            onValueChange = { viewModel.updateTextContent(key, it) },
-                            label = { Text(key.replace("_", " ").uppercase()) },
+                            onValueChange = {
+                                viewModel.updateTextContent(
+                                    key,
+                                    it
+                                )
+                            },
+                            label = {
+                                Text(
+                                    key
+                                        .replace("_", " ")
+                                        .replaceFirstChar { c ->
+                                            c.uppercase()
+                                        }
+                                )
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(14.dp),
+
                             leadingIcon = {
                                 val icon = when {
-                                    key.contains("rate") || key.contains("offer") -> Icons.Default.LocalOffer
-                                    key.contains("shop") || key.contains("brand") -> Icons.Default.Store
-                                    key.contains("footer") || key.contains("contact") -> Icons.Default.Info
+                                    key.contains(
+                                        "offer",
+                                        true
+                                    ) -> Icons.Default.LocalOffer
+
+                                    key.contains(
+                                        "shop",
+                                        true
+                                    ) -> Icons.Default.Store
+
+                                    key.contains(
+                                        "address",
+                                        true
+                                    ) ||
+                                            key.contains(
+                                                "footer",
+                                                true
+                                            ) -> Icons.Default.LocationOn
+
                                     else -> Icons.Default.Edit
                                 }
+
                                 Icon(
-                                    icon, 
-                                    contentDescription = null, 
-                                    modifier = Modifier.size(20.dp),
+                                    imageVector = icon,
+                                    contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             },
-                            singleLine = !key.contains("address") && !key.contains("footer")
+
+                            minLines = if (
+                                key.contains("address", true) ||
+                                key.contains("footer", true) ||
+                                key.contains("message", true)
+                            ) 3 else 1,
+
+                            singleLine = !(
+                                    key.contains("address", true) ||
+                                            key.contains("footer", true) ||
+                                            key.contains("message", true)
+                                    )
                         )
                     }
-                
+
                 Spacer(modifier = Modifier.height(40.dp))
             }
         }

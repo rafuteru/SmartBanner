@@ -1,6 +1,7 @@
 package lab.smartbanner.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -18,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import lab.smartbanner.model.ImageElement
+import lab.smartbanner.utils.toColor
 
 /**
  * Renders an image element dynamically on the poster canvas.
@@ -31,47 +33,57 @@ fun DynamicImage(
 ) {
     val width = (element.width * scale).dp
     val height = (element.height * scale).dp
+    val shape = RoundedCornerShape((element.cornerRadius * scale).dp)
 
-    SubcomposeAsyncImage(
-        model = element.imageUrl,
-        contentDescription = null,
+    Box(
         modifier = modifier
             .offset(
                 x = (element.x * scale).dp,
                 y = (element.y * scale).dp
             )
             .size(width, height)
-            .clip(RoundedCornerShape((element.cornerRadius * scale).dp)),
-        contentScale = ContentScale.Crop,
-        loading = {
-            // Placeholder shown while loading
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.LightGray.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = "Loading",
-                    tint = Color.Gray.copy(alpha = 0.5f)
-                )
+            .then(
+                if (element.borderWidth > 0 && element.borderColor != null) {
+                    Modifier.border(
+                        width = (element.borderWidth * scale).dp,
+                        color = element.borderColor.toColor(),
+                        shape = shape
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .clip(shape)
+    ) {
+        SubcomposeAsyncImage(
+            model = element.imageUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            loading = {
+                ImagePlaceholder(color = Color.LightGray.copy(alpha = 0.3f))
+            },
+            error = {
+                // Better error state - uses a theme-friendly color or just a subtle placeholder
+                ImagePlaceholder(color = Color.Gray.copy(alpha = 0.1f))
             }
-        },
-        error = {
-            // Placeholder shown on error
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.LightGray.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = "Error",
-                    tint = Color.Red.copy(alpha = 0.2f)
-                )
-            }
-        }
-    )
+        )
+    }
+}
+
+@Composable
+private fun ImagePlaceholder(color: Color) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = "Placeholder",
+            tint = Color.Gray.copy(alpha = 0.4f),
+            modifier = Modifier.fillMaxSize(0.4f)
+        )
+    }
 }

@@ -1,12 +1,16 @@
 package lab.smartbanner.ui.components
 
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -30,18 +34,34 @@ fun DynamicText(
     val textToShow = overriddenText ?: element.text
     val textColor = overriddenColor ?: element.color.toColor()
 
-    Text(
-        text = textToShow,
+    Box(
         modifier = modifier
             .offset(
                 x = (element.x * scale).dp,
                 y = (element.y * scale).dp
             )
             .width((element.width * scale).dp)
-            .heightIn(max = (element.height * scale).dp),
-        style = TextStyle(
+            .height((element.height * scale).dp),
+        contentAlignment = when (element.verticalAlignment) {
+            "TOP" -> when (element.textAlign) {
+                "CENTER" -> Alignment.TopCenter
+                "END" -> Alignment.TopEnd
+                else -> Alignment.TopStart
+            }
+            "BOTTOM" -> when (element.textAlign) {
+                "CENTER" -> Alignment.BottomCenter
+                "END" -> Alignment.BottomEnd
+                else -> Alignment.BottomStart
+            }
+            else -> when (element.textAlign) {
+                "CENTER" -> Alignment.Center
+                "END" -> Alignment.CenterEnd
+                else -> Alignment.CenterStart
+            }
+        }
+    ) {
+        val baseStyle = TextStyle(
             fontSize = (element.fontSize * scale).sp,
-            color = textColor,
             fontWeight = when (element.fontWeight) {
                 "THIN" -> FontWeight.Thin
                 "LIGHT" -> FontWeight.Light
@@ -72,13 +92,41 @@ fun DynamicText(
             },
             letterSpacing = (element.letterSpacing * scale).sp,
             lineHeight = (element.fontSize * scale * element.lineHeightMultiplier).sp,
-        ),
-        maxLines = element.maxLines ?: Int.MAX_VALUE,
-        overflow = when (element.overflow) {
-            "ELLIPSIS" -> TextOverflow.Ellipsis
-            "VISIBLE" -> TextOverflow.Visible
-            else -> TextOverflow.Clip
-        },
-        softWrap = true
-    )
+        )
+
+        // Draw Stroke if defined
+        if (element.strokeWidth > 0 && element.strokeColor != null) {
+            val strokeColor = element.strokeColor.toColor()
+            Text(
+                text = textToShow,
+                style = baseStyle.copy(
+                    color = strokeColor,
+                    drawStyle = Stroke(
+                        width = element.strokeWidth * scale,
+                        join = StrokeJoin.Round
+                    )
+                ),
+                maxLines = element.maxLines ?: Int.MAX_VALUE,
+                overflow = when (element.overflow) {
+                    "ELLIPSIS" -> TextOverflow.Ellipsis
+                    "VISIBLE" -> TextOverflow.Visible
+                    else -> TextOverflow.Clip
+                },
+                softWrap = true
+            )
+        }
+
+        // Draw Fill
+        Text(
+            text = textToShow,
+            style = baseStyle.copy(color = textColor),
+            maxLines = element.maxLines ?: Int.MAX_VALUE,
+            overflow = when (element.overflow) {
+                "ELLIPSIS" -> TextOverflow.Ellipsis
+                "VISIBLE" -> TextOverflow.Visible
+                else -> TextOverflow.Clip
+            },
+            softWrap = true
+        )
+    }
 }

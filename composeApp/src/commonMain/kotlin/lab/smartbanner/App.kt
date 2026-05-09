@@ -57,15 +57,9 @@ fun App() {
                     TemplatePreviewViewModel(templateRepository, draftRepository)
                 }
                 
-                val draft by draftRepository.getLatestDraft().collectAsState(null)
-                
-                LaunchedEffect(route.templateId, draft) {
-                    val initialContent = if (draft?.templateId == route.templateId) {
-                        draft?.content
-                    } else {
-                        null
-                    }
-                    previewViewModel.loadTemplate(route.templateId, initialContent)
+                // Only trigger load once when entering the screen
+                LaunchedEffect(route.templateId) {
+                    previewViewModel.loadTemplate(route.templateId)
                 }
 
                 TemplatePreviewScreen(

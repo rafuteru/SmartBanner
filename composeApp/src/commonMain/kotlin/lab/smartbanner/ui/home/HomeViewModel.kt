@@ -19,8 +19,7 @@ sealed interface HomeUiState {
     data class Success(
         val templates: List<PosterTemplate>,
         val categories: List<String>,
-        val selectedCategory: String = "All",
-        val latestDraft: PosterDraft? = null
+        val selectedCategory: String = "All"
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -47,8 +46,6 @@ class HomeViewModel(
                 val templates = repository.getTemplates()
                 val categories = listOf("All") + templates.map { it.category }.distinct()
                 
-                // We'll update the Success state with the draft when it's collected in the UI
-                // or we can observe the flow here.
                 uiState = HomeUiState.Success(
                     templates = templates,
                     categories = categories
@@ -68,7 +65,7 @@ class HomeViewModel(
 
     fun clearDraft() {
         viewModelScope.launch {
-            draftRepository.clearDraft()
+            draftRepository.clearActiveDraft()
         }
     }
 }

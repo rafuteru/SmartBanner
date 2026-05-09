@@ -47,12 +47,15 @@ data class TextElement(
     val fontWeight: String = "NORMAL", // THIN, LIGHT, NORMAL, MEDIUM, BOLD, BLACK
     val fontStyle: String = "NORMAL", // NORMAL, ITALIC
     val textAlign: String = "CENTER", // START, CENTER, END, JUSTIFY
+    val verticalAlignment: String = "CENTER", // TOP, CENTER, BOTTOM
     val fontFamily: String = "SANS_SERIF", // SANS_SERIF, SERIF, MONOSPACE
     val textDecoration: String = "NONE", // NONE, UNDERLINE, LINE_THROUGH
     val letterSpacing: Float = 0f,
     val lineHeightMultiplier: Float = 1.2f,
     val maxLines: Int? = null,
     val overflow: String = "CLIP", // CLIP, ELLIPSIS, VISIBLE
+    val strokeWidth: Float = 0f,
+    val strokeColor: String? = null,
     val contentKey: String? = null,
     val colorKey: String? = null
 ) : ElementConfig()
@@ -68,6 +71,8 @@ data class ImageElement(
     override val zIndex: Int = 0,
     val imageUrl: String,
     val cornerRadius: Float = 0f,
+    val borderWidth: Float = 0f,
+    val borderColor: String? = null,
     val contentKey: String? = null
 ) : ElementConfig()
 
