@@ -13,7 +13,11 @@ class LocalTemplateRepository : TemplateRepository {
     }
 
     private val templatePaths = listOf(
-        "templates/jewellery_1.json"
+        "templates/jewellery_1.json",
+        "templates/festival_1.json",
+        "templates/clothing_1.json",
+        "templates/grocery_1.json",
+        "templates/coaching_1.json"
     )
 
     @OptIn(ExperimentalResourceApi::class)

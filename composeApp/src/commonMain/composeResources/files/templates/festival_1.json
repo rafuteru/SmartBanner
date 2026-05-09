@@ -1,0 +1,43 @@
+{
+  "id": "festival_1",
+  "name": "Diwali Greeting",
+  "category": "Festival",
+  "width": 1080.0,
+  "height": 1350.0,
+  "background": {
+    "color": "#263238",
+    "contentKey": "bg_color"
+  },
+  "elements": [
+    {
+      "type": "text",
+      "id": "main_wish",
+      "contentKey": "wish_text",
+      "x": 0.0,
+      "y": 400.0,
+      "width": 1080.0,
+      "height": 200.0,
+      "zIndex": 1,
+      "text": "Happy Diwali",
+      "fontSize": 120.0,
+      "color": "#FFD700",
+      "fontWeight": "BOLD",
+      "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "sub_text",
+      "contentKey": "sub_text",
+      "x": 0.0,
+      "y": 600.0,
+      "width": 1080.0,
+      "height": 100.0,
+      "zIndex": 1,
+      "text": "May your life be as bright as the lights",
+      "fontSize": 40.0,
+      "color": "#FFFFFF",
+      "fontWeight": "NORMAL",
+      "textAlign": "CENTER"
+    }
+  ]
+}

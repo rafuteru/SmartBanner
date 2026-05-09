@@ -1,0 +1,28 @@
+{
+  "id": "grocery_1",
+  "name": "Fresh Vegetables",
+  "category": "Grocery",
+  "width": 1080.0,
+  "height": 1350.0,
+  "background": {
+    "color": "#E8F5E9",
+    "contentKey": "bg_color"
+  },
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "contentKey": "title",
+      "x": 0.0,
+      "y": 100.0,
+      "width": 1080.0,
+      "height": 100.0,
+      "zIndex": 1,
+      "text": "FRESH & ORGANIC",
+      "fontSize": 50.0,
+      "color": "#2E7D32",
+      "fontWeight": "BOLD",
+      "textAlign": "CENTER"
+    }
+  ]
+}

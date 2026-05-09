@@ -1,0 +1,28 @@
+{
+  "id": "coaching_1",
+  "name": "Success Academy",
+  "category": "Coaching",
+  "width": 1080.0,
+  "height": 1350.0,
+  "background": {
+    "color": "#FFF3E0",
+    "contentKey": "bg_color"
+  },
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "contentKey": "title",
+      "x": 0.0,
+      "y": 100.0,
+      "width": 1080.0,
+      "height": 100.0,
+      "zIndex": 1,
+      "text": "ADMISSION OPEN",
+      "fontSize": 60.0,
+      "color": "#E65100",
+      "fontWeight": "BOLD",
+      "textAlign": "CENTER"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "clothing_1",
+  "name": "Summer Collection",
+  "category": "Clothing",
+  "width": 1080.0,
+  "height": 1350.0,
+  "background": {
+    "color": "#F5F5F5",
+    "contentKey": "bg_color"
+  },
+  "elements": [
+    {
+      "type": "text",
+      "id": "brand_name",
+      "contentKey": "brand_name",
+      "x": 0.0,
+      "y": 50.0,
+      "width": 1080.0,
+      "height": 100.0,
+      "zIndex": 1,
+      "text": "MODERN WEAR",
+      "fontSize": 60.0,
+      "color": "#212121",
+      "fontWeight": "BOLD",
+      "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "sale_tag",
+      "contentKey": "sale_text",
+      "x": 0.0,
+      "y": 1100.0,
+      "width": 1080.0,
+      "height": 150.0,
+      "zIndex": 1,
+      "text": "UP TO 50% OFF",
+      "fontSize": 80.0,
+      "color": "#D32F2F",
+      "fontWeight": "BLACK",
+      "textAlign": "CENTER"
+    }
+  ]
+}
