@@ -57,4 +57,19 @@ class TemplatePreviewViewModel(
             } else state
         }
     }
+
+    /**
+     * Updates color based on a key (e.g., "primary_color").
+     */
+    fun updateColorContent(key: String, hexColor: String) {
+        _uiState.update { state ->
+            if (state is PreviewUiState.Success) {
+                state.copy(
+                    content = state.content.copy(
+                        colorMap = state.content.colorMap + (key to hexColor)
+                    )
+                )
+            } else state
+        }
+    }
 }

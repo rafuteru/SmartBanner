@@ -18,7 +18,8 @@ data class PosterTemplate(
 @Serializable
 data class BackgroundConfig(
     val color: String = "#FFFFFF",
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val contentKey: String? = null
 )
 
 @Serializable
@@ -45,7 +46,8 @@ data class TextElement(
     val color: String = "#000000",
     val fontWeight: String = "NORMAL",
     val textAlign: String = "CENTER",
-    val contentKey: String? = null // Mapping key for dynamic replacement
+    val contentKey: String? = null,
+    val colorKey: String? = null
 ) : ElementConfig()
 
 @Serializable
@@ -59,7 +61,7 @@ data class ImageElement(
     override val zIndex: Int = 0,
     val imageUrl: String,
     val cornerRadius: Float = 0f,
-    val contentKey: String? = null // Mapping key for dynamic replacement
+    val contentKey: String? = null
 ) : ElementConfig()
 
 @Serializable
@@ -75,5 +77,6 @@ data class BannerElement(
     val cornerRadius: Float = 0f,
     val alpha: Float = 1.0f,
     val borderWidth: Float = 0f,
-    val borderColor: String? = null
+    val borderColor: String? = null,
+    val colorKey: String? = null
 ) : ElementConfig()

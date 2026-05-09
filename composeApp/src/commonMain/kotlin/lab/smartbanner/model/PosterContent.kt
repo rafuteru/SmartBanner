@@ -9,5 +9,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PosterContent(
     val textMap: Map<String, String> = emptyMap(),
-    val imageMap: Map<String, String> = emptyMap()
+    val imageMap: Map<String, String> = emptyMap(),
+    val colorMap: Map<String, String> = emptyMap()
 )

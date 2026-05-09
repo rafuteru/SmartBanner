@@ -5,7 +5,8 @@
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#FFF8E1"
+    "color": "#FFF8E1",
+    "contentKey": "bg_color"
   },
   "elements": [
     {
@@ -17,7 +18,8 @@
       "height": 220.0,
       "zIndex": 1,
       "color": "#8D6E63",
-      "alpha": 1.0
+      "alpha": 1.0,
+      "colorKey": "primary_theme"
     },
     {
       "type": "banner",
@@ -52,7 +54,8 @@
       "height": 250.0,
       "zIndex": 1,
       "color": "#EFEBE9",
-      "alpha": 0.8
+      "alpha": 0.8,
+      "colorKey": "secondary_theme"
     },
     {
       "type": "text",
@@ -97,7 +100,8 @@
       "fontSize": 45.0,
       "color": "#5D4037",
       "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "textAlign": "CENTER",
+      "colorKey": "accent_text"
     },
     {
       "type": "text",

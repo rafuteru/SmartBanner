@@ -23,8 +23,15 @@ fun PosterRenderer(
     modifier: Modifier = Modifier,
     content: PosterContent = PosterContent()
 ) {
+    // Resolve background color
+    val backgroundColor = template.background.contentKey?.let { key ->
+        content.colorMap[key]
+    } ?: template.background.color
+
     PosterCanvas(
-        template = template,
+        template = template.copy(
+            background = template.background.copy(color = backgroundColor)
+        ),
         modifier = modifier
     ) { scale ->
         // Layering: Elements with higher zIndex are drawn on top
@@ -36,8 +43,13 @@ fun PosterRenderer(
                         content.textMap[key]
                     } ?: element.text
 
+                    // Map color if colorKey is present
+                    val displayColor = element.colorKey?.let { key ->
+                        content.colorMap[key]
+                    } ?: element.color
+
                     DynamicText(
-                        element = element.copy(text = displayText),
+                        element = element.copy(text = displayText, color = displayColor),
                         scale = scale
                     )
                 }
@@ -53,8 +65,13 @@ fun PosterRenderer(
                     )
                 }
                 is BannerElement -> {
+                    // Map color if colorKey is present
+                    val displayColor = element.colorKey?.let { key ->
+                        content.colorMap[key]
+                    } ?: element.color
+
                     DynamicBanner(
-                        element = element,
+                        element = element.copy(color = displayColor),
                         scale = scale
                     )
                 }
