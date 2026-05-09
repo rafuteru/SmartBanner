@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import lab.smartbanner.model.BannerElement
 import lab.smartbanner.model.ImageElement
 import lab.smartbanner.model.TextElement
+import lab.smartbanner.ui.components.DynamicImage
 import lab.smartbanner.ui.components.DynamicText
 import lab.smartbanner.ui.components.PosterCanvas
 
@@ -81,7 +82,10 @@ fun TemplatePreviewScreen(
                                         )
                                     }
                                     is ImageElement -> {
-                                        // TODO: Implement Image rendering in next step
+                                        DynamicImage(
+                                            element = element,
+                                            scale = scale
+                                        )
                                     }
                                     is BannerElement -> {
                                         // TODO: Implement Banner rendering in next step
