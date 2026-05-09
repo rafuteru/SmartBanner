@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterTemplate
+import lab.smartbanner.model.TextElement
 
 sealed class PreviewUiState {
     object Loading : PreviewUiState()
@@ -31,6 +32,22 @@ class TemplatePreviewViewModel(
             } else {
                 _uiState.value = PreviewUiState.Error("Template not found")
             }
+        }
+    }
+
+    fun updateElementText(elementId: String, newText: String) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val updatedElements = currentState.template.elements.map { element ->
+                if (element is TextElement && element.id == elementId) {
+                    element.copy(text = newText)
+                } else {
+                    element
+                }
+            }
+            _uiState.value = currentState.copy(
+                template = currentState.template.copy(elements = updatedElements)
+            )
         }
     }
 }
