@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,32 +21,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lab.smartbanner.model.Template
+import lab.smartbanner.model.PosterTemplate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel,
     onNavigateToPreview: (String) -> Unit
 ) {
-    val categories = listOf("All", "Jewellery", "Clothing", "Festival", "Grocery")
-    var selectedCategory by remember { mutableStateOf("All") }
-
-    val dummyTemplates = remember {
-        listOf(
-            Template("1", "Jewellery Gold", "Jewellery"),
-            Template("2", "Festival Sale", "Festival"),
-            Template("3", "New Arrival", "Clothing"),
-            Template("4", "Grocery List", "Grocery"),
-            Template("5", "Wedding Special", "Jewellery"),
-            Template("6", "Summer Collection", "Clothing")
-        )
-    }
-
-    val filteredTemplates = if (selectedCategory == "All") {
-        dummyTemplates
-    } else {
-        dummyTemplates.filter { it.category == selectedCategory }
-    }
+    val uiState = viewModel.uiState
 
     Scaffold(
         topBar = {
@@ -73,40 +57,34 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Categories Section
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(categories) { category ->
-                    FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { selectedCategory = category },
-                        label = { Text(category) }
-                    )
+            when (val state = uiState) {
+                is HomeUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            }
-
-            // Template Grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(filteredTemplates) { template ->
-                    TemplateItem(
-                        template = template,
-                        onClick = { onNavigateToPreview(template.id) }
+                is HomeUiState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(state.message, color = MaterialTheme.colorScheme.error)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { viewModel.loadTemplates() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Retry")
+                        }
+                    }
+                }
+                is HomeUiState.Success -> {
+                    HomeContent(
+                        state = state,
+                        onCategorySelect = { viewModel.selectCategory(it) },
+                        onTemplateClick = { template -> onNavigateToPreview(template.id) }
                     )
                 }
             }
@@ -115,8 +93,58 @@ fun HomeScreen(
 }
 
 @Composable
+private fun HomeContent(
+    state: HomeUiState.Success,
+    onCategorySelect: (String) -> Unit,
+    onTemplateClick: (PosterTemplate) -> Unit
+) {
+    val filteredTemplates = remember(state.selectedCategory, state.templates) {
+        if (state.selectedCategory == "All") {
+            state.templates
+        } else {
+            state.templates.filter { it.category == state.selectedCategory }
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Categories Section
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(state.categories) { category ->
+                FilterChip(
+                    selected = state.selectedCategory == category,
+                    onClick = { onCategorySelect(category) },
+                    label = { Text(category) }
+                )
+            }
+        }
+
+        // Template Grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(filteredTemplates) { template ->
+                TemplateItem(
+                    template = template,
+                    onClick = { onTemplateClick(template) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun TemplateItem(
-    template: Template,
+    template: PosterTemplate,
     onClick: () -> Unit
 ) {
     Card(
@@ -137,7 +165,7 @@ fun TemplateItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = template.name.first().toString(),
+                    text = template.name.firstOrNull()?.toString() ?: "?",
                     fontSize = 48.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.Bold
