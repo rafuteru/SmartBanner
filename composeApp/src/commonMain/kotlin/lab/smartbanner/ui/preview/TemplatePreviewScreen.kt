@@ -1,18 +1,12 @@
 package lab.smartbanner.ui.preview
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,18 +15,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lab.smartbanner.model.BannerElement
 import lab.smartbanner.model.TextElement
 import lab.smartbanner.renderer.PosterRenderer
-import lab.smartbanner.utils.toColor
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatePreviewScreen(
     templateId: String,
@@ -62,8 +53,14 @@ fun TemplatePreviewScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Placeholder for Save/Export */ }) {
-                        Icon(Icons.Default.Download, contentDescription = "Export")
+                    Button(
+                        onClick = { /* Save action */ },
+                        modifier = Modifier.padding(end = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Save")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -127,7 +124,7 @@ private fun PreviewEditorContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp),
                 shadowElevation = 8.dp,
                 color = Color.White
             ) {
@@ -156,62 +153,19 @@ private fun PreviewEditorContent(
                     modifier = Modifier
                         .width(40.dp)
                         .height(4.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.outlineVariant,
+                            RoundedCornerShape(2.dp)
+                        )
                         .align(Alignment.CenterHorizontally)
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Colors Section
-                SectionHeader("Visual Style", Icons.Default.Palette)
-                Spacer(modifier = Modifier.height(16.dp))
+                SectionHeader("Poster Content", Icons.Default.TextFields)
+                Spacer(modifier = Modifier.height(20.dp))
 
-                val presetColors = listOf("#FFFFFF", "#FFF8E1", "#EFEBE9", "#8D6E63", "#5D4037", "#000000", "#FFD54F", "#F44336", "#2196F3", "#4CAF50")
-
-                // Background Color
-                template.background.contentKey?.let { key ->
-                    ColorPickerRow(
-                        label = "Background",
-                        selectedColor = content.colorMap[key] ?: template.background.color,
-                        colors = presetColors,
-                        onColorSelected = { viewModel.updateColorContent(key, it) }
-                    )
-                }
-
-                // Banner Colors
-                template.elements.filterIsInstance<BannerElement>()
-                    .filter { it.colorKey != null }
-                    .distinctBy { it.colorKey }
-                    .forEach { element ->
-                        val key = element.colorKey!!
-                        ColorPickerRow(
-                            label = key.replace("_", " ").capitalizeWords(),
-                            selectedColor = content.colorMap[key] ?: element.color,
-                            colors = presetColors,
-                            onColorSelected = { viewModel.updateColorContent(key, it) }
-                        )
-                    }
-
-                // Text Colors
-                template.elements.filterIsInstance<TextElement>()
-                    .filter { it.colorKey != null }
-                    .distinctBy { it.colorKey }
-                    .forEach { element ->
-                        val key = element.colorKey!!
-                        ColorPickerRow(
-                            label = "${key.replace("_", " ").capitalizeWords()} Color",
-                            selectedColor = content.colorMap[key] ?: element.color,
-                            colors = presetColors,
-                            onColorSelected = { viewModel.updateColorContent(key, it) }
-                        )
-                    }
-
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Content Section
-                SectionHeader("Text Content", Icons.Default.TextFields)
-                Spacer(modifier = Modifier.height(16.dp))
-
+                // Dynamically generate text fields for editable elements
                 template.elements
                     .filterIsInstance<TextElement>()
                     .filter { it.contentKey != null }
@@ -228,20 +182,21 @@ private fun PreviewEditorContent(
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-                            ),
                             leadingIcon = {
                                 val icon = when {
-                                    key.contains("rate") -> Icons.Default.CurrencyRupee
+                                    key.contains("rate") || key.contains("offer") -> Icons.Default.LocalOffer
                                     key.contains("shop") || key.contains("brand") -> Icons.Default.Store
-                                    key.contains("address") -> Icons.Default.LocationOn
+                                    key.contains("footer") || key.contains("contact") -> Icons.Default.Info
                                     else -> Icons.Default.Edit
                                 }
-                                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                                Icon(
+                                    icon, 
+                                    contentDescription = null, 
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             },
-                            singleLine = !key.contains("address")
+                            singleLine = !key.contains("address") && !key.contains("footer")
                         )
                     }
                 
@@ -257,64 +212,17 @@ private fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vect
         Icon(
             icon,
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.secondary
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onSurface,
             letterSpacing = 0.5.sp
         )
-    }
-}
-
-@Composable
-fun ColorPickerRow(
-    label: String,
-    selectedColor: String,
-    colors: List<String>,
-    onColorSelected: (String) -> Unit
-) {
-    Column(modifier = Modifier.padding(bottom = 20.dp)) {
-        Text(
-            text = label, 
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 2.dp)
-        ) {
-            items(colors) { hex ->
-                val isSelected = hex.lowercase() == selectedColor.lowercase()
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(hex.toColor())
-                        .clickable { onColorSelected(hex) }
-                        .border(
-                            width = if (isSelected) 3.dp else 1.dp,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.1f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSelected) {
-                        Icon(
-                            Icons.Default.Check, 
-                            contentDescription = null, 
-                            tint = if (hex.lowercase() == "#ffffff") Color.Black else Color.White, 
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -327,14 +235,21 @@ private fun PreviewErrorState(message: String, onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
+        Icon(
+            Icons.Default.ErrorOutline, 
+            contentDescription = null, 
+            modifier = Modifier.size(48.dp), 
+            tint = MaterialTheme.colorScheme.error
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = message, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+        Text(
+            text = message, 
+            style = MaterialTheme.typography.bodyMedium, 
+            textAlign = TextAlign.Center
+        )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = onRetry) {
             Text("Retry")
         }
     }
 }
-
-private fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }

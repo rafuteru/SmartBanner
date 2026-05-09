@@ -14,6 +14,7 @@ class LocalTemplateRepository : TemplateRepository {
 
     private val templatePaths = listOf(
         "templates/jewellery_1.json",
+        "templates/jewellery_2.json",
         "templates/festival_1.json",
         "templates/clothing_1.json",
         "templates/grocery_1.json",
@@ -24,7 +25,6 @@ class LocalTemplateRepository : TemplateRepository {
     override suspend fun getTemplates(): List<PosterTemplate> {
         return templatePaths.mapNotNull { path ->
             try {
-                // By default, Res is in lab.smartbanner.generated.resources
                 val bytes = Res.readBytes(path)
                 val jsonString = bytes.decodeToString()
                 json.decodeFromString<PosterTemplate>(jsonString)
