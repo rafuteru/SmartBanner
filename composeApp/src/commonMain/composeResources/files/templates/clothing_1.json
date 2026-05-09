@@ -1,43 +1,68 @@
 {
   "id": "clothing_1",
-  "name": "Summer Collection",
+  "name": "Urban Style Collection",
   "category": "Clothing",
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#F5F5F5",
+    "color": "#FFFFFF",
     "contentKey": "bg_color"
   },
   "elements": [
     {
-      "type": "text",
-      "id": "brand_name",
-      "contentKey": "brand_name",
-      "x": 0.0,
-      "y": 50.0,
-      "width": 1080.0,
-      "height": 100.0,
-      "zIndex": 1,
-      "text": "MODERN WEAR",
-      "fontSize": 60.0,
-      "color": "#212121",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "type": "banner",
+      "id": "side_accent",
+      "x": 0.0, "y": 0.0, "width": 150.0, "height": 1350.0, "zIndex": 1,
+      "color": "#212121"
     },
     {
       "type": "text",
+      "id": "brand_vertical", "contentKey": "brand_name",
+      "x": -300.0, "y": 600.0, "width": 800.0, "height": 100.0, "zIndex": 2,
+      "text": "MODERN VIBES", "fontSize": 40.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
+    },
+    {
+      "type": "image",
+      "id": "hero_image", "contentKey": "hero_image",
+      "x": 200.0, "y": 100.0, "width": 800.0, "height": 900.0, "zIndex": 1,
+      "imageUrl": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1000&q=80",
+      "cornerRadius": 10.0
+    },
+    {
+      "type": "banner",
+      "id": "title_bg",
+      "x": 100.0, "y": 850.0, "width": 600.0, "height": 200.0, "zIndex": 3,
+      "color": "#FFFFFF", "alpha": 0.9
+    },
+    {
+      "type": "text",
+      "id": "main_title", "contentKey": "title",
+      "x": 130.0, "y": 880.0, "width": 540.0, "height": 80.0, "zIndex": 4,
+      "text": "SUMMER", "fontSize": 90.0, "color": "#212121", "fontWeight": "BLACK", "textAlign": "START"
+    },
+    {
+      "type": "text",
+      "id": "sub_title", "contentKey": "subtitle",
+      "x": 130.0, "y": 960.0, "width": 540.0, "height": 50.0, "zIndex": 4,
+      "text": "COLLECTION 2024", "fontSize": 40.0, "color": "#757575", "letterSpacing": 8.0, "textAlign": "START"
+    },
+    {
+      "type": "banner",
       "id": "sale_tag",
-      "contentKey": "sale_text",
-      "x": 0.0,
-      "y": 1100.0,
-      "width": 1080.0,
-      "height": 150.0,
-      "zIndex": 1,
-      "text": "UP TO 50% OFF",
-      "fontSize": 80.0,
-      "color": "#D32F2F",
-      "fontWeight": "BLACK",
-      "textAlign": "CENTER"
+      "x": 750.0, "y": 1050.0, "width": 330.0, "height": 150.0, "zIndex": 3,
+      "color": "#D32F2F"
+    },
+    {
+      "type": "text",
+      "id": "sale_text", "contentKey": "sale_text",
+      "x": 750.0, "y": 1080.0, "width": 330.0, "height": 80.0, "zIndex": 4,
+      "text": "50% OFF", "fontSize": 55.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "shop_now", "contentKey": "cta_text",
+      "x": 200.0, "y": 1200.0, "width": 300.0, "height": 50.0, "zIndex": 2,
+      "text": "SHOP ONLINE AT WEBSITE.COM", "fontSize": 24.0, "color": "#212121", "fontWeight": "BOLD", "textAlign": "START"
     }
   ]
 }

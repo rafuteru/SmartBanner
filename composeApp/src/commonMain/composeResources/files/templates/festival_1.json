@@ -1,43 +1,62 @@
 {
   "id": "festival_1",
-  "name": "Diwali Greeting",
+  "name": "Royal Diwali Greeting",
   "category": "Festival",
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#263238",
+    "color": "#2D033B",
     "contentKey": "bg_color"
   },
   "elements": [
     {
-      "type": "text",
-      "id": "main_wish",
-      "contentKey": "wish_text",
-      "x": 0.0,
-      "y": 400.0,
-      "width": 1080.0,
-      "height": 200.0,
-      "zIndex": 1,
-      "text": "Happy Diwali",
-      "fontSize": 120.0,
-      "color": "#FFD700",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "type": "banner",
+      "id": "top_pattern",
+      "x": 0.0, "y": 0.0, "width": 1080.0, "height": 200.0, "zIndex": 1,
+      "color": "#810CA8", "alpha": 0.3
+    },
+    {
+      "type": "image",
+      "id": "diya_left",
+      "x": 50.0, "y": 50.0, "width": 200.0, "height": 200.0, "zIndex": 2,
+      "imageUrl": "https://images.unsplash.com/photo-1605128362691-88f57f6874c9?auto=format&fit=crop&w=300&q=80"
+    },
+    {
+      "type": "image",
+      "id": "diya_right",
+      "x": 830.0, "y": 50.0, "width": 200.0, "height": 200.0, "zIndex": 2,
+      "imageUrl": "https://images.unsplash.com/photo-1605128362691-88f57f6874c9?auto=format&fit=crop&w=300&q=80"
     },
     {
       "type": "text",
-      "id": "sub_text",
-      "contentKey": "sub_text",
-      "x": 0.0,
-      "y": 600.0,
-      "width": 1080.0,
-      "height": 100.0,
-      "zIndex": 1,
-      "text": "May your life be as bright as the lights",
-      "fontSize": 40.0,
-      "color": "#FFFFFF",
-      "fontWeight": "NORMAL",
-      "textAlign": "CENTER"
+      "id": "main_wish", "contentKey": "wish_text",
+      "x": 0.0, "y": 350.0, "width": 1080.0, "height": 200.0, "zIndex": 3,
+      "text": "शुभ दीपावली", "fontSize": 140.0, "color": "#FFD700", "fontWeight": "BOLD", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "sub_wish", "contentKey": "sub_wish",
+      "x": 0.0, "y": 530.0, "width": 1080.0, "height": 80.0, "zIndex": 3,
+      "text": "HAPPY DIWALI", "fontSize": 50.0, "color": "#E5B8F4", "letterSpacing": 10.0, "textAlign": "CENTER"
+    },
+    {
+      "type": "image",
+      "id": "main_illustration",
+      "x": 140.0, "y": 650.0, "width": 800.0, "height": 450.0, "zIndex": 2,
+      "imageUrl": "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80",
+      "cornerRadius": 20.0
+    },
+    {
+      "type": "text",
+      "id": "message", "contentKey": "message",
+      "x": 100.0, "y": 1120.0, "width": 880.0, "height": 100.0, "zIndex": 3,
+      "text": "May this festival of lights bring peace, prosperity, and happiness to your life.", "fontSize": 32.0, "color": "#FFFFFF", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "sender", "contentKey": "sender_name",
+      "x": 0.0, "y": 1240.0, "width": 1080.0, "height": 60.0, "zIndex": 3,
+      "text": "With Love: Rahul & Family", "fontSize": 36.0, "color": "#FFD700", "fontWeight": "BOLD", "textAlign": "CENTER"
     }
   ]
 }

@@ -59,13 +59,15 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { /* Placeholder for custom creation */ },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Create Custom") }
-            )
+            if (uiState is HomeUiState.Success && uiState.templates.isNotEmpty()) {
+                ExtendedFloatingActionButton(
+                    onClick = { onNavigateToPreview(uiState.templates.first().id) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Create Custom") }
+                )
+            }
         }
     ) { paddingValues ->
         Column(

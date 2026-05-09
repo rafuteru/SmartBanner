@@ -1,28 +1,74 @@
 {
   "id": "coaching_1",
-  "name": "Success Academy",
+  "name": "Professional Academy Flyer",
   "category": "Coaching",
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#FFF3E0",
+    "color": "#FFFFFF",
     "contentKey": "bg_color"
   },
   "elements": [
     {
+      "type": "banner",
+      "id": "header_slant",
+      "x": -100.0, "y": -100.0, "width": 1280.0, "height": 400.0, "zIndex": 1,
+      "color": "#1A237E"
+    },
+    {
       "type": "text",
-      "id": "title",
-      "contentKey": "title",
-      "x": 0.0,
-      "y": 100.0,
-      "width": 1080.0,
-      "height": 100.0,
-      "zIndex": 1,
-      "text": "ADMISSION OPEN",
-      "fontSize": 60.0,
-      "color": "#E65100",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "id": "academy_name", "contentKey": "academy_name",
+      "x": 60.0, "y": 60.0, "width": 960.0, "height": 80.0, "zIndex": 2,
+      "text": "EXCELLENCE COACHING CENTRE", "fontSize": 50.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "START"
+    },
+    {
+      "type": "text",
+      "id": "tagline", "contentKey": "tagline",
+      "x": 60.0, "y": 140.0, "width": 960.0, "height": 40.0, "zIndex": 2,
+      "text": "Building Foundations for a Brighter Future", "fontSize": 24.0, "color": "#C5CAE9", "textAlign": "START"
+    },
+    {
+      "type": "banner",
+      "id": "admission_badge",
+      "x": 700.0, "y": 250.0, "width": 320.0, "height": 100.0, "zIndex": 3,
+      "color": "#FFD600", "cornerRadius": 50.0
+    },
+    {
+      "type": "text",
+      "id": "admission_text", "contentKey": "status",
+      "x": 700.0, "y": 280.0, "width": 320.0, "height": 40.0, "zIndex": 4,
+      "text": "ADMISSIONS OPEN", "fontSize": 28.0, "color": "#000000", "fontWeight": "BLACK", "textAlign": "CENTER"
+    },
+    {
+      "type": "image",
+      "id": "student_img", "contentKey": "hero_image",
+      "x": 60.0, "y": 380.0, "width": 960.0, "height": 500.0, "zIndex": 1,
+      "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80",
+      "cornerRadius": 20.0
+    },
+    {
+      "type": "text",
+      "id": "main_heading", "contentKey": "heading",
+      "x": 60.0, "y": 920.0, "width": 960.0, "height": 80.0, "zIndex": 2,
+      "text": "Target NEET & JEE 2025", "fontSize": 65.0, "color": "#1A237E", "fontWeight": "BLACK", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "features", "contentKey": "features",
+      "x": 100.0, "y": 1020.0, "width": 880.0, "height": 120.0, "zIndex": 2,
+      "text": "• Expert Faculty  • Personal Mentorship\n• Mock Tests  • Comprehensive Study Material", "fontSize": 32.0, "color": "#455A64", "textAlign": "CENTER"
+    },
+    {
+      "type": "banner",
+      "id": "footer",
+      "x": 0.0, "y": 1180.0, "width": 1080.0, "height": 170.0, "zIndex": 1,
+      "color": "#1A237E"
+    },
+    {
+      "type": "text",
+      "id": "address", "contentKey": "address",
+      "x": 60.0, "y": 1210.0, "width": 960.0, "height": 100.0, "zIndex": 2,
+      "text": "123 Education Hub, Knowledge Park, City\nContact: 1800-123-4567 | www.excellence.com", "fontSize": 30.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
     }
   ]
 }

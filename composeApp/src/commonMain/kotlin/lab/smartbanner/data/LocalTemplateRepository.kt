@@ -12,6 +12,7 @@ class LocalTemplateRepository : TemplateRepository {
         coerceInputValues = true
     }
 
+    // Paths are relative to the 'files' directory in composeResources
     private val templatePaths = listOf(
         "templates/jewellery_1.json",
         "templates/jewellery_2.json",
@@ -23,7 +24,7 @@ class LocalTemplateRepository : TemplateRepository {
 
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun getTemplates(): List<PosterTemplate> {
-        return templatePaths.mapNotNull { path ->
+        val loadedTemplates = templatePaths.mapNotNull { path ->
             try {
                 val bytes = Res.readBytes(path)
                 val jsonString = bytes.decodeToString()
@@ -32,7 +33,20 @@ class LocalTemplateRepository : TemplateRepository {
                 println("Error loading template $path: ${e.message}")
                 null
             }
+        }.toMutableList()
+
+        // Fallback hardcoded template if nothing is loaded to ensure UI works
+        if (loadedTemplates.isEmpty()) {
+            loadedTemplates.add(
+                PosterTemplate(
+                    id = "default_fallback",
+                    name = "Default Template",
+                    category = "General"
+                )
+            )
         }
+
+        return loadedTemplates
     }
 
     override suspend fun getTemplateById(id: String): PosterTemplate? {

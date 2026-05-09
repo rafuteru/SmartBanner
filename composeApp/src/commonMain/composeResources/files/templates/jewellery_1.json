@@ -1,152 +1,80 @@
 {
   "id": "jewellery_1",
-  "name": "Royal Gold Jewellery",
+  "name": "Royal Gold & Diamonds",
   "category": "Jewellery",
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#FFF8E1",
+    "color": "#0A0A0A",
     "contentKey": "bg_color"
   },
   "elements": [
     {
       "type": "banner",
-      "id": "header_banner",
-      "x": 0.0,
-      "y": 0.0,
-      "width": 1080.0,
-      "height": 220.0,
-      "zIndex": 1,
-      "color": "#8D6E63",
-      "alpha": 1.0,
-      "colorKey": "primary_theme"
+      "id": "border_top",
+      "x": 40.0, "y": 40.0, "width": 1000.0, "height": 1270.0, "zIndex": 1,
+      "color": "transparent", "borderWidth": 2.0, "borderColor": "#D4AF37"
     },
     {
       "type": "banner",
-      "id": "image_border",
-      "x": 120.0,
-      "y": 400.0,
-      "width": 840.0,
-      "height": 690.0,
-      "zIndex": 1,
-      "color": "#FFFFFF",
-      "cornerRadius": 40.0,
-      "borderWidth": 4.0,
-      "borderColor": "#8D6E63"
+      "id": "header_accent",
+      "x": 0.0, "y": 0.0, "width": 1080.0, "height": 300.0, "zIndex": 2,
+      "color": "#1A1A1A"
+    },
+    {
+      "type": "text",
+      "id": "shop_name", "contentKey": "shop_name",
+      "x": 0.0, "y": 80.0, "width": 1080.0, "height": 100.0, "zIndex": 3,
+      "text": "राजपूताना ज्वेलर्स", "fontSize": 85.0, "color": "#D4AF37", "fontWeight": "BOLD", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "tagline", "contentKey": "tagline",
+      "x": 0.0, "y": 185.0, "width": 1080.0, "height": 50.0, "zIndex": 3,
+      "text": "EXQUISITE CRAFTSMANSHIP SINCE 1950", "fontSize": 28.0, "color": "#FFFFFF", "letterSpacing": 4.0, "textAlign": "CENTER"
     },
     {
       "type": "image",
-      "id": "main_image",
-      "x": 140.0,
-      "y": 420.0,
-      "width": 800.0,
-      "height": 650.0,
-      "zIndex": 2,
-      "imageUrl": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80",
-      "cornerRadius": 30.0
+      "id": "hero_image",
+      "x": 100.0, "y": 320.0, "width": 880.0, "height": 600.0, "zIndex": 2,
+      "imageUrl": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1000&q=80",
+      "cornerRadius": 20.0
     },
     {
       "type": "banner",
-      "id": "footer_banner",
-      "x": 0.0,
-      "y": 1100.0,
-      "width": 1080.0,
-      "height": 250.0,
-      "zIndex": 1,
-      "color": "#EFEBE9",
-      "alpha": 0.8,
-      "colorKey": "secondary_theme"
+      "id": "offer_bg",
+      "x": 540.0, "y": 880.0, "width": 440.0, "height": 120.0, "zIndex": 4,
+      "color": "#D4AF37", "cornerRadius": 60.0
     },
     {
       "type": "text",
-      "id": "shop_name_hindi",
-      "contentKey": "shop_name",
-      "x": 0.0,
-      "y": 40.0,
-      "width": 1080.0,
-      "height": 100.0,
-      "zIndex": 3,
-      "text": "श्री ज्वेलर्स",
-      "fontSize": 75.0,
-      "color": "#FFFFFF",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "id": "offer_text", "contentKey": "offer",
+      "x": 540.0, "y": 910.0, "width": 440.0, "height": 60.0, "zIndex": 5,
+      "text": "FESTIVE 25% OFF", "fontSize": 38.0, "color": "#000000", "fontWeight": "BLACK", "textAlign": "CENTER"
     },
     {
       "type": "text",
-      "id": "shop_name_en",
-      "contentKey": "shop_name_en",
-      "x": 0.0,
-      "y": 130.0,
-      "width": 1080.0,
-      "height": 60.0,
-      "zIndex": 3,
-      "text": "SHREE JEWELLERS",
-      "fontSize": 35.0,
-      "color": "#FFD54F",
-      "fontWeight": "NORMAL",
-      "textAlign": "CENTER"
+      "id": "description", "contentKey": "description",
+      "x": 100.0, "y": 950.0, "width": 400.0, "height": 150.0, "zIndex": 3,
+      "text": "Discover our new bridal collection in 22K Gold and Lab-grown Diamonds.", "fontSize": 32.0, "color": "#E0E0E0", "textAlign": "START"
+    },
+    {
+      "type": "banner",
+      "id": "footer_strip",
+      "x": 0.0, "y": 1150.0, "width": 1080.0, "height": 200.0, "zIndex": 2,
+      "color": "#D4AF37"
     },
     {
       "type": "text",
-      "id": "offer_text",
-      "contentKey": "offer",
-      "x": 0.0,
-      "y": 300.0,
-      "width": 1080.0,
-      "height": 80.0,
-      "zIndex": 3,
-      "text": "मेकिंग चार्ज पर 50% की छूट!",
-      "fontSize": 45.0,
-      "color": "#5D4037",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER",
-      "colorKey": "accent_text"
+      "id": "address", "contentKey": "address",
+      "x": 50.0, "y": 1180.0, "width": 980.0, "height": 60.0, "zIndex": 3,
+      "text": "Chandni Chowk, New Delhi | +91 99999 88888", "fontSize": 34.0, "color": "#000000", "fontWeight": "BOLD", "textAlign": "CENTER"
     },
     {
       "type": "text",
-      "id": "gold_rate",
-      "contentKey": "gold_rate",
-      "x": 150.0,
-      "y": 1120.0,
-      "width": 400.0,
-      "height": 60.0,
-      "zIndex": 3,
-      "text": "Gold: ₹75,000",
-      "fontSize": 35.0,
-      "color": "#8D6E63",
-      "fontWeight": "BOLD",
-      "textAlign": "START"
-    },
-    {
-      "type": "text",
-      "id": "silver_rate",
-      "contentKey": "silver_rate",
-      "x": 600.0,
-      "y": 1120.0,
-      "width": 400.0,
-      "height": 60.0,
-      "zIndex": 3,
-      "text": "Silver: ₹92,000",
-      "fontSize": 35.0,
-      "color": "#8D6E63",
-      "fontWeight": "BOLD",
-      "textAlign": "START"
-    },
-    {
-      "type": "text",
-      "id": "address",
-      "contentKey": "address",
-      "x": 50.0,
-      "y": 1200.0,
-      "width": 980.0,
-      "height": 120.0,
-      "zIndex": 3,
-      "text": "मेन मार्केट, गांधी चौक, जयपुर\nसंपर्क: +91 9876543210",
-      "fontSize": 32.0,
-      "color": "#5D4037",
-      "fontWeight": "NORMAL",
-      "textAlign": "CENTER"
+      "id": "social", "contentKey": "social",
+      "x": 0.0, "y": 1250.0, "width": 1080.0, "height": 40.0, "zIndex": 3,
+      "text": "www.rajputanajewels.com", "fontSize": 24.0, "color": "#000000", "textAlign": "CENTER"
     }
   ]
 }

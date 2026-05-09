@@ -1,28 +1,74 @@
 {
   "id": "grocery_1",
-  "name": "Fresh Vegetables",
+  "name": "Fresh Harvest Grocery",
   "category": "Grocery",
   "width": 1080.0,
   "height": 1350.0,
   "background": {
-    "color": "#E8F5E9",
+    "color": "#F1F8E9",
     "contentKey": "bg_color"
   },
   "elements": [
     {
+      "type": "banner",
+      "id": "header_accent",
+      "x": 0.0, "y": 0.0, "width": 1080.0, "height": 150.0, "zIndex": 1,
+      "color": "#2E7D32"
+    },
+    {
       "type": "text",
-      "id": "title",
-      "contentKey": "title",
-      "x": 0.0,
-      "y": 100.0,
-      "width": 1080.0,
-      "height": 100.0,
-      "zIndex": 1,
-      "text": "FRESH & ORGANIC",
-      "fontSize": 50.0,
-      "color": "#2E7D32",
-      "fontWeight": "BOLD",
-      "textAlign": "CENTER"
+      "id": "shop_name", "contentKey": "shop_name",
+      "x": 40.0, "y": 40.0, "width": 1000.0, "height": 70.0, "zIndex": 2,
+      "text": "ताजा सब्जी भंडार", "fontSize": 60.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
+    },
+    {
+      "type": "banner",
+      "id": "hero_bg",
+      "x": 60.0, "y": 180.0, "width": 960.0, "height": 600.0, "zIndex": 1,
+      "color": "#FFFFFF", "cornerRadius": 40.0
+    },
+    {
+      "type": "image",
+      "id": "main_image", "contentKey": "hero_image",
+      "x": 80.0, "y": 200.0, "width": 920.0, "height": 560.0, "zIndex": 2,
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80",
+      "cornerRadius": 30.0
+    },
+    {
+      "type": "banner",
+      "id": "offer_badge",
+      "x": 60.0, "y": 700.0, "width": 300.0, "height": 120.0, "zIndex": 3,
+      "color": "#C62828", "cornerRadius": 20.0
+    },
+    {
+      "type": "text",
+      "id": "discount", "contentKey": "offer_text",
+      "x": 60.0, "y": 725.0, "width": 300.0, "height": 70.0, "zIndex": 4,
+      "text": "30% OFF", "fontSize": 45.0, "color": "#FFFFFF", "fontWeight": "BLACK", "textAlign": "CENTER"
+    },
+    {
+      "type": "text",
+      "id": "headline", "contentKey": "headline",
+      "x": 60.0, "y": 850.0, "width": 960.0, "height": 80.0, "zIndex": 2,
+      "text": "FRESH ORGANIC VEGETABLES", "fontSize": 55.0, "color": "#1B5E20", "fontWeight": "BOLD", "textAlign": "START"
+    },
+    {
+      "type": "text",
+      "id": "sub_headline", "contentKey": "sub_headline",
+      "x": 60.0, "y": 930.0, "width": 960.0, "height": 50.0, "zIndex": 2,
+      "text": "Farm to your doorstep within 2 hours", "fontSize": 32.0, "color": "#4CAF50", "textAlign": "START"
+    },
+    {
+      "type": "banner",
+      "id": "footer",
+      "x": 0.0, "y": 1150.0, "width": 1080.0, "height": 200.0, "zIndex": 1,
+      "color": "#2E7D32"
+    },
+    {
+      "type": "text",
+      "id": "contact_info", "contentKey": "address",
+      "x": 60.0, "y": 1190.0, "width": 960.0, "height": 120.0, "zIndex": 2,
+      "text": "Main Market, Sector 12, Noida\nCall: +91 98989 89898", "fontSize": 34.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
     }
   ]
 }
