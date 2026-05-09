@@ -5,14 +5,18 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import lab.smartbanner.domain.TemplateRepository
+import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
-import lab.smartbanner.model.TextElement
 
 sealed class PreviewUiState {
     object Loading : PreviewUiState()
-    data class Success(val template: PosterTemplate) : PreviewUiState()
+    data class Success(
+        val template: PosterTemplate,
+        val content: PosterContent
+    ) : PreviewUiState()
     data class Error(val message: String) : PreviewUiState()
 }
 
@@ -28,26 +32,29 @@ class TemplatePreviewViewModel(
             _uiState.value = PreviewUiState.Loading
             val template = repository.getTemplateById(id)
             if (template != null) {
-                _uiState.value = PreviewUiState.Success(template)
+                // Initialize content map with default values from template if needed
+                _uiState.value = PreviewUiState.Success(
+                    template = template,
+                    content = PosterContent()
+                )
             } else {
                 _uiState.value = PreviewUiState.Error("Template not found")
             }
         }
     }
 
-    fun updateElementText(elementId: String, newText: String) {
-        val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
-            val updatedElements = currentState.template.elements.map { element ->
-                if (element is TextElement && element.id == elementId) {
-                    element.copy(text = newText)
-                } else {
-                    element
-                }
-            }
-            _uiState.value = currentState.copy(
-                template = currentState.template.copy(elements = updatedElements)
-            )
+    /**
+     * Updates content based on a key (e.g., "shop_name") instead of a specific element ID.
+     */
+    fun updateTextContent(key: String, value: String) {
+        _uiState.update { state ->
+            if (state is PreviewUiState.Success) {
+                state.copy(
+                    content = state.content.copy(
+                        textMap = state.content.textMap + (key to value)
+                    )
+                )
+            } else state
         }
     }
 }

@@ -57,6 +57,7 @@
     {
       "type": "text",
       "id": "shop_name_hindi",
+      "contentKey": "shop_name",
       "x": 0.0,
       "y": 40.0,
       "width": 1080.0,
@@ -71,6 +72,7 @@
     {
       "type": "text",
       "id": "shop_name_en",
+      "contentKey": "shop_name_en",
       "x": 0.0,
       "y": 130.0,
       "width": 1080.0,
@@ -85,6 +87,7 @@
     {
       "type": "text",
       "id": "offer_text",
+      "contentKey": "offer",
       "x": 0.0,
       "y": 300.0,
       "width": 1080.0,
@@ -99,6 +102,7 @@
     {
       "type": "text",
       "id": "gold_rate",
+      "contentKey": "gold_rate",
       "x": 150.0,
       "y": 1120.0,
       "width": 400.0,
@@ -113,6 +117,7 @@
     {
       "type": "text",
       "id": "silver_rate",
+      "contentKey": "silver_rate",
       "x": 600.0,
       "y": 1120.0,
       "width": 400.0,
@@ -127,6 +132,7 @@
     {
       "type": "text",
       "id": "address",
+      "contentKey": "address",
       "x": 50.0,
       "y": 1200.0,
       "width": 980.0,
