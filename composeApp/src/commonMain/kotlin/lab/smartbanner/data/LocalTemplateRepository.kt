@@ -17,6 +17,7 @@ class LocalTemplateRepository : TemplateRepository {
     private val templatePaths = listOf(
         "files/templates/jewellery_1.json",
         "files/templates/jewellery_2.json",
+        "files/templates/jewellery_3.json",
         "files/templates/festival_1.json",
         "files/templates/clothing_1.json",
         "files/templates/grocery_1.json",
