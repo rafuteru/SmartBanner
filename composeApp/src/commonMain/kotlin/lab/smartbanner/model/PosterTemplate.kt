@@ -100,5 +100,7 @@ data class BannerElement(
     override val zIndex: Int = 0,
     val color: String = "#000000",
     val cornerRadius: Float = 0f,
-    val alpha: Float = 1.0f
+    val alpha: Float = 1.0f,
+    val borderWidth: Float = 0f,
+    val borderColor: String? = null
 ) : ElementConfig()
