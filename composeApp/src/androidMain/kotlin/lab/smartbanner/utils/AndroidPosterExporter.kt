@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 
 class AndroidPosterExporter(private val context: Context) : PosterExporter {
 
@@ -87,4 +86,9 @@ class AndroidPosterExporter(private val context: Context) : PosterExporter {
             Result.failure(e)
         }
     }
+}
+
+actual fun createPosterExporter(context: Any?): PosterExporter {
+    require(context is Context) { "Android PosterExporter requires a Context" }
+    return AndroidPosterExporter(context)
 }

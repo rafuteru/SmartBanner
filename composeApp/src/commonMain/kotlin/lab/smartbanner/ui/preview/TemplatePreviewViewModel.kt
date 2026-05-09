@@ -1,5 +1,6 @@
 package lab.smartbanner.ui.preview
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -11,6 +12,7 @@ import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
+import lab.smartbanner.utils.PosterExporter
 
 sealed class PreviewUiState {
     object Loading : PreviewUiState()
@@ -23,12 +25,16 @@ sealed class PreviewUiState {
 
 class TemplatePreviewViewModel(
     private val repository: TemplateRepository,
-    private val draftRepository: DraftRepository
+    private val draftRepository: DraftRepository,
+    private val posterExporter: PosterExporter
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PreviewUiState>(PreviewUiState.Loading)
     val uiState: StateFlow<PreviewUiState> = _uiState.asStateFlow()
     
+    private val _exportResult = MutableSharedFlow<Result<Unit>>()
+    val exportResult = _exportResult.asSharedFlow()
+
     private var saveJob: Job? = null
 
     fun loadTemplate(id: String, initialContent: PosterContent? = null) {
@@ -104,6 +110,17 @@ class TemplatePreviewViewModel(
             saveJob?.cancel()
             draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
             draftRepository.clearActiveDraft()
+        }
+    }
+
+    fun exportPoster(bitmap: ImageBitmap) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            viewModelScope.launch {
+                val fileName = "PosterWala_${currentState.template.id}_${System.currentTimeMillis()}"
+                val result = posterExporter.saveToGallery(bitmap, fileName)
+                _exportResult.emit(result)
+            }
         }
     }
 }

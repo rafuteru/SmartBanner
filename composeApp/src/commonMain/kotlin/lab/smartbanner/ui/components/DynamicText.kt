@@ -94,13 +94,12 @@ fun DynamicText(
             lineHeight = (element.fontSize * scale * element.lineHeightMultiplier).sp,
         )
 
-        // Draw Stroke if defined
+        // Draw Stroke if defined (typically for the Shop Name)
         if (element.strokeWidth > 0 && element.strokeColor != null) {
-            val strokeColor = element.strokeColor.toColor()
             Text(
                 text = textToShow,
                 style = baseStyle.copy(
-                    color = strokeColor,
+                    color = element.strokeColor.toColor(),
                     drawStyle = Stroke(
                         width = element.strokeWidth * scale,
                         join = StrokeJoin.Round

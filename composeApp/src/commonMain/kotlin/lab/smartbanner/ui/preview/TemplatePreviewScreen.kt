@@ -15,7 +15,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,6 +37,18 @@ fun TemplatePreviewScreen(
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val graphicsLayer = rememberGraphicsLayer()
+
+    // Handle export results
+    LaunchedEffect(Unit) {
+        viewModel.exportResult.collect { result ->
+            if (result.isSuccess) {
+                snackbarHostState.showSnackbar("Poster saved to gallery!")
+            } else {
+                snackbarHostState.showSnackbar("Failed to export: ${result.exceptionOrNull()?.message}")
+            }
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -62,7 +77,12 @@ fun TemplatePreviewScreen(
                     IconButton(
                         onClick = {
                             scope.launch {
-                                snackbarHostState.showSnackbar("Exporting image... (Feature coming soon)")
+                                try {
+                                    val bitmap = graphicsLayer.toImageBitmap()
+                                    viewModel.exportPoster(bitmap)
+                                } catch (e: Exception) {
+                                    snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                }
                             }
                         }
                     ) {
@@ -108,7 +128,8 @@ fun TemplatePreviewScreen(
                 is PreviewUiState.Success -> {
                     PreviewEditorContent(
                         state = state,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        graphicsLayer = graphicsLayer
                     )
                 }
             }
@@ -119,7 +140,8 @@ fun TemplatePreviewScreen(
 @Composable
 private fun PreviewEditorContent(
     state: PreviewUiState.Success,
-    viewModel: TemplatePreviewViewModel
+    viewModel: TemplatePreviewViewModel,
+    graphicsLayer: androidx.compose.ui.graphics.layer.GraphicsLayer
 ) {
     val template = state.template
     val content = state.content
@@ -159,11 +181,16 @@ private fun PreviewEditorContent(
                 )
             ) {
 
-                // Fixed canvas renderer
+                // Capture area - no internal padding to capture full poster
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp)
+                        .drawWithContent {
+                            graphicsLayer.record {
+                                this@drawWithContent.drawContent()
+                            }
+                            drawContent()
+                        }
                 ) {
                     PosterRenderer(
                         template = template,

@@ -18,6 +18,7 @@ import lab.smartbanner.ui.preview.TemplatePreviewScreen
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
 import lab.smartbanner.ui.theme.PosterWalaTheme
 import lab.smartbanner.utils.createDataStore
+import lab.smartbanner.utils.createPosterExporter
 
 @Composable
 @Preview
@@ -30,6 +31,7 @@ fun App() {
         val dataStore = remember { createDataStore(context) }
         val templateRepository = remember { LocalTemplateRepository() }
         val draftRepository = remember { DataStoreDraftRepository(dataStore) }
+        val posterExporter = remember { createPosterExporter(context) }
 
         NavHost(
             navController = navController,
@@ -54,7 +56,7 @@ fun App() {
             composable<Screen.TemplatePreview> { backStackEntry ->
                 val route: Screen.TemplatePreview = backStackEntry.toRoute()
                 val previewViewModel: TemplatePreviewViewModel = viewModel {
-                    TemplatePreviewViewModel(templateRepository, draftRepository)
+                    TemplatePreviewViewModel(templateRepository, draftRepository, posterExporter)
                 }
                 
                 // Only trigger load once when entering the screen
