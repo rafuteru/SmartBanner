@@ -37,6 +37,7 @@ class TemplatePreviewViewModel(
     val exportResult = _exportResult.asSharedFlow()
 
     private var saveJob: Job? = null
+    private var originalContent: PosterContent? = null
 
     fun loadTemplate(id: String, initialContent: PosterContent? = null) {
         val currentState = _uiState.value
@@ -60,6 +61,7 @@ class TemplatePreviewViewModel(
                             draftRepository.getSavedContent(id).first() ?: PosterContent()
                         }
                     }
+                    this@TemplatePreviewViewModel.originalContent = content
                     _uiState.value = PreviewUiState.Success(template, content)
                 } else {
                     _uiState.value = PreviewUiState.Error("Template not found")
@@ -91,14 +93,17 @@ class TemplatePreviewViewModel(
 
     /**
      * Saves the current content specifically for this template AND as an active draft.
+     * Only saves if the content has been modified.
      */
     suspend fun saveCurrentDraft() {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
-            saveJob?.cancel()
-            val draft = PosterDraft(currentState.template.id, currentState.content)
-            draftRepository.saveDraft(draft)
-            draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
+            if (currentState.content != originalContent) {
+                saveJob?.cancel()
+                val draft = PosterDraft(currentState.template.id, currentState.content)
+                draftRepository.saveDraft(draft)
+                draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
+            }
         }
     }
 
