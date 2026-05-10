@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import lab.smartbanner.domain.DraftRepository
 import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.domain.TemplateRepository
@@ -117,7 +118,8 @@ class TemplatePreviewViewModel(
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
             viewModelScope.launch {
-                val fileName = "PosterWala_${currentState.template.id}_${System.currentTimeMillis()}"
+                val timestamp = Clock.System.now().toEpochMilliseconds()
+                val fileName = "PosterWala_${currentState.template.id}_$timestamp"
                 val result = posterExporter.saveToGallery(bitmap, fileName)
                 _exportResult.emit(result)
             }

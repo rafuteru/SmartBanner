@@ -5,7 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import lab.smartbanner.data.DataStoreDraftRepository
+import lab.smartbanner.data.LocalTemplateRepository
+import lab.smartbanner.utils.createDataStore
+import lab.smartbanner.utils.createPosterExporter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +19,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            App()
+            val context = LocalContext.current
+            val templateRepository = remember { LocalTemplateRepository() }
+            val dataStore = remember { createDataStore(context) }
+            val draftRepository = remember { DataStoreDraftRepository(dataStore) }
+            val posterExporter = remember { createPosterExporter(context) }
+
+            App(
+                templateRepository = templateRepository,
+                draftRepository = draftRepository,
+                posterExporter = posterExporter
+            )
         }
     }
 }
@@ -21,5 +37,6 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    // For preview, we might need mock implementations or just provide dummy ones
+    // but since this is just a preview, we can leave it or fix it if needed.
 }
