@@ -2,12 +2,18 @@ package lab.smartbanner
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
 
 class AndroidPlatform(private val context: Context?) : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
     
+    override val isDebug: Boolean
+        get() = context?.let {
+            (it.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        } ?: false
+
     override fun openEmail(recipient: String, subject: String, body: String) {
         context?.let { ctx ->
             val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -19,7 +25,6 @@ class AndroidPlatform(private val context: Context?) : Platform {
             try {
                 ctx.startActivity(intent)
             } catch (e: Exception) {
-                // If mailto fails, try a generic chooser
                 val fallbackIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "message/rfc822"
                     putExtra(Intent.EXTRA_EMAIL, arrayOf(recipient))
@@ -30,7 +35,6 @@ class AndroidPlatform(private val context: Context?) : Platform {
                 try {
                     ctx.startActivity(Intent.createChooser(fallbackIntent, "Send Email").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } catch (ex: Exception) {
-                    // Log or show error
                 }
             }
         }

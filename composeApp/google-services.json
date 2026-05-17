@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "558258486754",
+    "project_id": "smart-banner-cac45",
+    "storage_bucket": "smart-banner-cac45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558258486754:android:fa072722457d13640b0dbb",
+        "android_client_info": {
+          "package_name": "lab.smartbanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf6vM43qo8EXxqiZ4eT9vUoeFF1Q5ZC4Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

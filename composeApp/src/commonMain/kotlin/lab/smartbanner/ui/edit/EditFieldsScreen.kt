@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import lab.smartbanner.model.ImageElement
+import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.TextElement
 import lab.smartbanner.ui.preview.PreviewUiState
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
@@ -27,6 +29,12 @@ fun EditFieldsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+
+    // Local state to hold changes before saving
+    var localContent by remember(uiState) {
+        mutableStateOf((uiState as? PreviewUiState.Success)?.content ?: PosterContent())
+    }
 
     Scaffold(
         topBar = {
@@ -35,6 +43,16 @@ fun EditFieldsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            viewModel.updateContent(localContent)
+                            onBack()
+                        }
+                    ) {
+                        Text("SAVE", fontWeight = FontWeight.Bold)
                     }
                 }
             )
@@ -48,7 +66,6 @@ fun EditFieldsScreen(
             when (val state = uiState) {
                 is PreviewUiState.Success -> {
                     val template = state.template
-                    val content = state.content
 
                     Column(
                         modifier = Modifier
@@ -72,11 +89,15 @@ fun EditFieldsScreen(
                             )
                             imageElements.forEach { element ->
                                 val key = element.contentKey!!
-                                val currentValue = content.imageMap[key] ?: element.imageUrl
+                                val currentValue = localContent.imageMap[key] ?: element.imageUrl
                                 
                                 OutlinedTextField(
                                     value = currentValue,
-                                    onValueChange = { viewModel.updateImageContent(key, it) },
+                                    onValueChange = { newValue ->
+                                        localContent = localContent.copy(
+                                            imageMap = localContent.imageMap + (key to newValue)
+                                        )
+                                    },
                                     label = {
                                         Text(key.replace("_", " ").capitalizeWords())
                                     },
@@ -98,48 +119,38 @@ fun EditFieldsScreen(
                             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         }
 
-                        // 2. Text Elements Logic (Most used first)
+                        // 2. Text Elements
                         val textElements = template.elements
                             .filterIsInstance<TextElement>()
                             .filter { it.contentKey != null }
                             .distinctBy { it.contentKey }
                             .sortedWith(
-                                compareByDescending<TextElement> { content.usageCount[it.contentKey] ?: 0 }
+                                compareByDescending<TextElement> { localContent.usageCount[it.contentKey] ?: 0 }
                                     .thenByDescending { it.priority }
                                     .thenBy { it.y }
                             )
 
-                        val frequentlyUsed = textElements.takeWhile { (content.usageCount[it.contentKey] ?: 0) > 0 }.take(5)
-                        val remainingText = textElements.filterNot { frequentlyUsed.contains(it) }
-
-                        if (frequentlyUsed.isNotEmpty()) {
-                            Text(
-                                "Frequently Used", 
-                                style = MaterialTheme.typography.titleMedium, 
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
-                            )
-                            frequentlyUsed.forEach { element ->
-                                EditTextFieldItem(element, content.textMap[element.contentKey!!] ?: element.text, viewModel)
-                            }
+                        Text(
+                            "Text Details", 
+                            style = MaterialTheme.typography.titleMedium, 
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
+                        )
+                        
+                        textElements.forEach { element ->
+                            val key = element.contentKey!!
+                            val value = localContent.textMap[key] ?: element.text
                             
-                            if (remainingText.isNotEmpty()) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-                            }
-                        }
-
-                        if (remainingText.isNotEmpty()) {
-                            Text(
-                                if (frequentlyUsed.isEmpty()) "Text Details" else "Other Fields", 
-                                style = MaterialTheme.typography.titleMedium, 
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
+                            EditTextFieldItem(
+                                key = key,
+                                currentValue = value,
+                                onValueChange = { newValue ->
+                                    localContent = localContent.copy(
+                                        textMap = localContent.textMap + (key to newValue)
+                                    )
+                                }
                             )
-                            remainingText.forEach { element ->
-                                EditTextFieldItem(element, content.textMap[element.contentKey!!] ?: element.text, viewModel)
-                            }
                         }
                         
                         Spacer(modifier = Modifier.height(100.dp))
@@ -157,21 +168,21 @@ fun EditFieldsScreen(
 
 @Composable
 private fun EditTextFieldItem(
-    element: TextElement,
+    key: String,
     currentValue: String,
-    viewModel: TemplatePreviewViewModel
+    onValueChange: (String) -> Unit
 ) {
-    val key = element.contentKey!!
     val isMultilinePreference = key.contains("address", true) ||
             key.contains("footer", true) ||
             key.contains("discount", true) ||
             key.contains("offer", true) ||
             key.contains("exchange", true) ||
-            key.contains("message", true)
+            key.contains("message", true) ||
+            key.contains("establishment", true)
 
     OutlinedTextField(
         value = currentValue,
-        onValueChange = { viewModel.updateTextContent(key, it) },
+        onValueChange = onValueChange,
         label = {
             Text(key.replace("_", " ").capitalizeWords())
         },

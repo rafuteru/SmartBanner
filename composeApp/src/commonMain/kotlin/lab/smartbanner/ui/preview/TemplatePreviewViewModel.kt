@@ -86,7 +86,35 @@ class TemplatePreviewViewModel(
                 colorMap = theme.colors
             )
             _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
-            autoSave(updatedContent, currentState.template.id)
+            saveContent(updatedContent, currentState.template.id)
+        }
+    }
+
+    fun updateContent(content: PosterContent) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            _uiState.value = currentState.copy(content = content)
+            saveContent(content, currentState.template.id)
+        }
+    }
+
+    private fun saveContent(content: PosterContent, templateId: String) {
+        viewModelScope.launch {
+            val draft = PosterDraft(templateId, content)
+            draftRepository.saveDraft(draft)
+            draftRepository.saveTemplateContent(templateId, content)
+        }
+    }
+
+    fun resetToDefault() {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val emptyContent = PosterContent()
+            _uiState.value = currentState.copy(content = emptyContent, selectedThemeId = null)
+            viewModelScope.launch {
+                draftRepository.clearActiveDraft()
+                draftRepository.saveTemplateContent(currentState.template.id, emptyContent)
+            }
         }
     }
 
@@ -106,7 +134,7 @@ class TemplatePreviewViewModel(
                 colorMap = theme.colors
             )
             _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
-            autoSave(updatedContent, currentState.template.id)
+            saveContent(updatedContent, currentState.template.id)
         }
     }
 
@@ -120,60 +148,7 @@ class TemplatePreviewViewModel(
             val newSelectedThemeId = if (isSelectedThemeDeleted) null else currentState.selectedThemeId
             
             _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = newSelectedThemeId)
-            autoSave(updatedContent, currentState.template.id)
-        }
-    }
-
-    fun updateColor(key: String, hexColor: String) {
-        val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
-            val updatedColors = currentState.content.colorMap.toMutableMap()
-            updatedColors[key] = hexColor
-            val updatedContent = currentState.content.copy(colorMap = updatedColors)
-            
-            val allThemes = currentState.template.themes + currentState.content.userThemes
-            val matchingThemeId = allThemes.find { it.colors == updatedColors }?.id
-            
-            _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = matchingThemeId)
-            autoSave(updatedContent, currentState.template.id)
-        }
-    }
-
-    fun updateTextContent(key: String, value: String) {
-        val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
-            val currentUsage = currentState.content.usageCount[key] ?: 0
-            val updatedUsage = currentState.content.usageCount + (key to currentUsage + 1)
-            
-            val updatedContent = currentState.content.copy(
-                textMap = currentState.content.textMap + (key to value),
-                usageCount = updatedUsage
-            )
-            _uiState.value = currentState.copy(content = updatedContent)
-            autoSave(updatedContent, currentState.template.id)
-        }
-    }
-
-    fun updateImageContent(key: String, url: String) {
-        val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
-            val currentUsage = currentState.content.usageCount[key] ?: 0
-            val updatedUsage = currentState.content.usageCount + (key to currentUsage + 1)
-            
-            val updatedContent = currentState.content.copy(
-                imageMap = currentState.content.imageMap + (key to url),
-                usageCount = updatedUsage
-            )
-            _uiState.value = currentState.copy(content = updatedContent)
-            autoSave(updatedContent, currentState.template.id)
-        }
-    }
-
-    private fun autoSave(content: PosterContent, templateId: String) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
-            delay(300)
-            draftRepository.saveDraft(PosterDraft(templateId, content))
+            saveContent(updatedContent, currentState.template.id)
         }
     }
 
@@ -181,7 +156,6 @@ class TemplatePreviewViewModel(
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
             if (currentState.content != originalContent) {
-                saveJob?.cancel()
                 val draft = PosterDraft(currentState.template.id, currentState.content)
                 draftRepository.saveDraft(draft)
                 draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
@@ -192,7 +166,6 @@ class TemplatePreviewViewModel(
     suspend fun completeEditing() {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
-            saveJob?.cancel()
             draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
             draftRepository.clearActiveDraft()
         }

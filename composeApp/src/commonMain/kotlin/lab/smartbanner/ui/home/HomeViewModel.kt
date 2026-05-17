@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import lab.smartbanner.domain.DraftRepository
+import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterTemplate
 
@@ -22,14 +22,25 @@ sealed interface HomeUiState {
 
 class HomeViewModel(
     private val repository: TemplateRepository,
-    private val draftRepository: DraftRepository
+    private val authRepository: AccessCodeRepository
 ) : ViewModel() {
 
     var uiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
         private set
+        
+    var currentIdentifier: String by mutableStateOf("")
+        private set
 
     init {
         loadTemplates()
+        fetchIdentifier()
+    }
+
+    private fun fetchIdentifier() {
+        viewModelScope.launch {
+            // Use the persistent Support ID instead of the transient Firebase UID
+            currentIdentifier = authRepository.getAccessCode()
+        }
     }
 
     fun loadTemplates() {

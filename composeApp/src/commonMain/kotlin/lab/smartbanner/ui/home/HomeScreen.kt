@@ -10,9 +10,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,21 +39,50 @@ import lab.smartbanner.renderer.PosterRenderer
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onNavigateToPreview: (String) -> Unit
+    onNavigateToPreview: (String) -> Unit,
+    onLogout: () -> Unit
 ) {
     val uiState = viewModel.uiState
+    var showIdDialog by remember { mutableStateOf(false) }
+    var isCodeVisible by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
+
+    val maskedCode = remember(viewModel.currentIdentifier) {
+        if (viewModel.currentIdentifier.length > 4) {
+            "*".repeat(viewModel.currentIdentifier.length - 4) + viewModel.currentIdentifier.takeLast(4)
+        } else {
+            "*".repeat(viewModel.currentIdentifier.length)
+        }
+    }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        "SmartBanner",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable { showIdDialog = true }
+                    ) {
+                        Text(
+                            "SmartBanner",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp
+                            )
                         )
-                    )
+                        if (viewModel.currentIdentifier.isNotEmpty()) {
+                            Text(
+                                text = "Access Code: $maskedCode",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -59,9 +94,9 @@ fun HomeScreen(
             ExtendedFloatingActionButton(
                 onClick = {
                     getPlatform().openEmail(
-                        recipient = "xyz@gmail.com",
+                        recipient = "coffeeat202labs@gmail.com",
                         subject = "Custom Design Request",
-                        body = "Hi, I would like to request a custom theme for SmartBanner. Please find my design attached.\n\n[Send your design we will add a theme for you. Once ready you will be notified over same mail.]"
+                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: ${viewModel.currentIdentifier}\n\n[Send your design we will add a theme for you.]"
                     )
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -97,6 +132,57 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (showIdDialog) {
+        AlertDialog(
+            onDismissRequest = { showIdDialog = false },
+            title = { Text("Access Code") },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "Tap below to copy your Access Code. Share it with our team for custom design requests.",
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Button(
+                        onClick = { 
+                            clipboardManager.setText(AnnotatedString(viewModel.currentIdentifier))
+                            showIdDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Copy Access Code")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.clickable { isCodeVisible = !isCodeVisible }
+                    ) {
+                        Text(
+                            text = "Code: " + if (isCodeVisible) viewModel.currentIdentifier else maskedCode,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = if (isCodeVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (isCodeVisible) "Hide" else "Show",
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            },
+            confirmButton = {}
+        )
     }
 }
 
@@ -150,7 +236,6 @@ private fun HomeContent(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Categories Section
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -175,7 +260,6 @@ private fun HomeContent(
         if (filteredTemplates.isEmpty()) {
             EmptyState(category = state.selectedCategory)
         } else {
-            // Template Grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
@@ -242,7 +326,6 @@ fun TemplateItem(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column {
-            // Improved Template Preview Area: Show a mini renderer instead of just an alphabet
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -259,13 +342,12 @@ fun TemplateItem(
                 ) {
                     PosterRenderer(
                         template = template,
-                        content = PosterContent(), // Use default template content for preview
+                        content = PosterContent(),
                         modifier = Modifier.fillMaxSize()
                     )
                 }
             }
             
-            // Template Info
             Column(
                 modifier = Modifier
                     .padding(12.dp)

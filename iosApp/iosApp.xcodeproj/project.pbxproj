@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		21C89C3A2FB9912800C5AD1C /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 21C89C392FB9912800C5AD1C /* FirebaseCore */; };
+		21C89C3C2FB9912800C5AD1C /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 21C89C3B2FB9912800C5AD1C /* FirebaseCrashlytics */; };
+		21C89C3E2FB9912800C5AD1C /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 21C89C3D2FB9912800C5AD1C /* FirebaseRemoteConfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		F07421CA4DA70E2090F496C9 /* SmartBanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartBanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +47,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21C89C3C2FB9912800C5AD1C /* FirebaseCrashlytics in Frameworks */,
+				21C89C3A2FB9912800C5AD1C /* FirebaseCore in Frameworks */,
+				21C89C3E2FB9912800C5AD1C /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,11 +64,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		21C89C332FB98C6700C5AD1C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AB114E6E1170547803CF1C88 = {
 			isa = PBXGroup;
 			children = (
 				E6728DE1683482729D0C3422 /* Configuration */,
 				F467D9DA044EA46E19477D43 /* iosApp */,
+				21C89C332FB98C6700C5AD1C /* Frameworks */,
 				0076E21337CCE6EC4B3CC4F5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,6 +102,9 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				21C89C392FB9912800C5AD1C /* FirebaseCore */,
+				21C89C3B2FB9912800C5AD1C /* FirebaseCrashlytics */,
+				21C89C3D2FB9912800C5AD1C /* FirebaseRemoteConfig */,
 			);
 			productName = iosApp;
 			productReference = F07421CA4DA70E2090F496C9 /* SmartBanner.app */;
@@ -114,6 +134,9 @@
 			);
 			mainGroup = AB114E6E1170547803CF1C88;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				21C89C362FB9912800C5AD1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0076E21337CCE6EC4B3CC4F5 /* Products */;
 			projectDirPath = "";
@@ -301,17 +324,13 @@
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = SZ7R4B96QJ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = lab.smartbanner;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -329,17 +348,13 @@
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = SZ7R4B96QJ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = lab.smartbanner;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -368,6 +383,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		21C89C362FB9912800C5AD1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		21C89C392FB9912800C5AD1C /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21C89C362FB9912800C5AD1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		21C89C3B2FB9912800C5AD1C /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21C89C362FB9912800C5AD1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		21C89C3D2FB9912800C5AD1C /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21C89C362FB9912800C5AD1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AD7D6E1F20850882188776D0 /* Project object */;
 }

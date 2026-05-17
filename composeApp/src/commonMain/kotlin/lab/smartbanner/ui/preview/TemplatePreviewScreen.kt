@@ -45,6 +45,7 @@ fun TemplatePreviewScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val graphicsLayer = rememberGraphicsLayer()
+    var showResetDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.exportResult.collect { result ->
@@ -75,6 +76,9 @@ fun TemplatePreviewScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showResetDialog = true }) {
+                        Icon(Icons.Default.RestartAlt, contentDescription = "Reset to Default")
+                    }
                     IconButton(
                         onClick = {
                             scope.launch {
@@ -141,6 +145,29 @@ fun TemplatePreviewScreen(
                 }
             }
         }
+
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text("Reset Template") },
+                text = { Text("Are you sure you want to discard all changes and reset to the original template?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.resetToDefault()
+                            showResetDialog = false
+                        }
+                    ) {
+                        Text("Reset")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -159,7 +186,7 @@ private fun PreviewContent(
     val scrollState = rememberScrollState()
 
     val posterAspectRatio = remember(template.width, template.height) {
-        template.width / template.height
+        template.width.toFloat() / template.height.toFloat()
     }
 
     var themeToDelete by remember { mutableStateOf<PosterTheme?>(null) }
