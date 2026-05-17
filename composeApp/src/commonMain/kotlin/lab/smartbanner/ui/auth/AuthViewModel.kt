@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.AuthState
+import lab.smartbanner.domain.ConfigRepository
 
 class AuthViewModel(
-    private val authRepository: AccessCodeRepository
+    private val authRepository: AccessCodeRepository,
+    private val configRepository: ConfigRepository
 ) : ViewModel() {
 
     val authState: StateFlow<AuthState> = authRepository.authState
@@ -19,6 +21,8 @@ class AuthViewModel(
     fun signInWithCode(code: String) {
         viewModelScope.launch {
             authRepository.signInWithCode(code)
+            // Refresh config immediately after sign in to fetch user-specific templates
+            configRepository.refresh()
         }
     }
 

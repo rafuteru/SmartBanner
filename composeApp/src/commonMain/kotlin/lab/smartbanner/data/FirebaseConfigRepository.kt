@@ -16,11 +16,15 @@ class FirebaseConfigRepository(private val isDebug: Boolean) : ConfigRepository 
 
     init {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-            runCatching {
-                config.settings { minimumFetchInterval = if (isDebug) 0.seconds else 3600.seconds }
-                config.fetchAndActivate()
-            }
+            refresh()
         }
+    }
+
+    override suspend fun refresh(): Boolean {
+        return runCatching {
+            config.settings { minimumFetchInterval = if (isDebug) 0.seconds else 3600.seconds }
+            config.fetchAndActivate()
+        }.isSuccess
     }
 
     override fun getTemplateIdsForUser(userId: String): List<String> {
