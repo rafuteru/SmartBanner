@@ -6,26 +6,51 @@
   "height": 1350.0,
   "background": {
     "color": "#F1F8E9",
-    "contentKey": "bg_color"
+    "colorKey": "background"
   },
+  "themes": [
+    {
+      "id": "theme_organic_green",
+      "name": "Organic Green",
+      "colors": {
+        "background": "#F1F8E9",
+        "primary": "#2E7D32",
+        "secondary": "#FFFFFF",
+        "accent": "#C62828",
+        "text_main": "#1B5E20"
+      }
+    },
+    {
+      "id": "theme_sunny_market",
+      "name": "Sunny Market",
+      "colors": {
+        "background": "#FFFDE7",
+        "primary": "#FBC02D",
+        "secondary": "#FFFFFF",
+        "accent": "#E64A19",
+        "text_main": "#5D4037"
+      }
+    }
+  ],
   "elements": [
     {
       "type": "banner",
       "id": "header_accent",
       "x": 0.0, "y": 0.0, "width": 1080.0, "height": 150.0, "zIndex": 1,
-      "color": "#2E7D32"
+      "color": "#2E7D32", "colorKey": "primary"
     },
     {
       "type": "text",
       "id": "shop_name", "contentKey": "shop_name",
       "x": 40.0, "y": 40.0, "width": 1000.0, "height": 70.0, "zIndex": 2,
-      "text": "ताजा सब्जी भंडार", "fontSize": 60.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
+      "text": "ताजा सब्जी भंडार", "fontSize": 60.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER",
+      "priority": 10
     },
     {
       "type": "banner",
       "id": "hero_bg",
       "x": 60.0, "y": 180.0, "width": 960.0, "height": 600.0, "zIndex": 1,
-      "color": "#FFFFFF", "cornerRadius": 40.0
+      "color": "#FFFFFF", "colorKey": "secondary", "cornerRadius": 40.0
     },
     {
       "type": "image",
@@ -38,37 +63,41 @@
       "type": "banner",
       "id": "offer_badge",
       "x": 60.0, "y": 700.0, "width": 300.0, "height": 120.0, "zIndex": 3,
-      "color": "#C62828", "cornerRadius": 20.0
+      "color": "#C62828", "colorKey": "accent", "cornerRadius": 20.0
     },
     {
       "type": "text",
       "id": "discount", "contentKey": "offer_text",
       "x": 60.0, "y": 725.0, "width": 300.0, "height": 70.0, "zIndex": 4,
-      "text": "30% OFF", "fontSize": 45.0, "color": "#FFFFFF", "fontWeight": "BLACK", "textAlign": "CENTER"
+      "text": "30% OFF", "fontSize": 45.0, "color": "#FFFFFF", "fontWeight": "BLACK", "textAlign": "CENTER",
+      "priority": 8
     },
     {
       "type": "text",
       "id": "headline", "contentKey": "headline",
       "x": 60.0, "y": 850.0, "width": 960.0, "height": 80.0, "zIndex": 2,
-      "text": "FRESH ORGANIC VEGETABLES", "fontSize": 55.0, "color": "#1B5E20", "fontWeight": "BOLD", "textAlign": "START"
+      "text": "FRESH ORGANIC VEGETABLES", "fontSize": 55.0, "color": "#1B5E20", "colorKey": "text_main", "fontWeight": "BOLD", "textAlign": "START",
+      "priority": 9
     },
     {
       "type": "text",
       "id": "sub_headline", "contentKey": "sub_headline",
       "x": 60.0, "y": 930.0, "width": 960.0, "height": 50.0, "zIndex": 2,
-      "text": "Farm to your doorstep within 2 hours", "fontSize": 32.0, "color": "#4CAF50", "textAlign": "START"
+      "text": "Farm to your doorstep within 2 hours", "fontSize": 32.0, "color": "#4CAF50", "textAlign": "START",
+      "priority": 5
     },
     {
       "type": "banner",
       "id": "footer",
       "x": 0.0, "y": 1150.0, "width": 1080.0, "height": 200.0, "zIndex": 1,
-      "color": "#2E7D32"
+      "color": "#2E7D32", "colorKey": "primary"
     },
     {
       "type": "text",
       "id": "contact_info", "contentKey": "address",
       "x": 60.0, "y": 1190.0, "width": 960.0, "height": 120.0, "zIndex": 2,
-      "text": "Main Market, Sector 12, Noida\nCall: +91 98989 89898", "fontSize": 34.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER"
+      "text": "Main Market, Sector 12, Noida\nCall: +91 98989 89898", "fontSize": 34.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER",
+      "priority": 7
     }
   ]
 }

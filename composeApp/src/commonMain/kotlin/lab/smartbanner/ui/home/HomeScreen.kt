@@ -1,8 +1,5 @@
 package lab.smartbanner.ui.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,39 +10,39 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lab.smartbanner.domain.PosterDraft
+import lab.smartbanner.getPlatform
+import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
+import lab.smartbanner.renderer.PosterRenderer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onNavigateToPreview: (String) -> Unit,
-    onResumeDraft: (PosterDraft) -> Unit
+    onNavigateToPreview: (String) -> Unit
 ) {
     val uiState = viewModel.uiState
-    val latestDraft by viewModel.latestDraft.collectAsState()
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "PosterWala",
+                        "SmartBanner",
                         style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.2.sp
@@ -59,105 +56,44 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            if (uiState is HomeUiState.Success && uiState.templates.isNotEmpty()) {
-                ExtendedFloatingActionButton(
-                    onClick = { onNavigateToPreview(uiState.templates.first().id) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Create Custom") }
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = {
+                    getPlatform().openEmail(
+                        recipient = "xyz@gmail.com",
+                        subject = "Custom Design Request",
+                        body = "Hi, I would like to request a custom theme for SmartBanner. Please find my design attached.\n\n[Send your design we will add a theme for you. Once ready you will be notified over same mail.]"
+                    )
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = { Icon(Icons.Default.Email, contentDescription = null) },
+                text = { Text("Request Custom Design") }
+            )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Draft Resume Card
-            AnimatedVisibility(
-                visible = latestDraft != null,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                latestDraft?.let { draft ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                color = MaterialTheme.colorScheme.secondary,
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSecondary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "Continue editing?",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    "You have an unsaved draft from your last session.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                                )
-                            }
-                            IconButton(onClick = { viewModel.clearDraft() }) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear Draft")
-                            }
-                            Button(
-                                onClick = { onResumeDraft(draft) },
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text("Resume")
-                            }
-                        }
+            when (val state = uiState) {
+                is HomeUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(strokeWidth = 3.dp)
                     }
                 }
-            }
-
-            Box(modifier = Modifier.weight(1f)) {
-                when (val state = uiState) {
-                    is HomeUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(strokeWidth = 3.dp)
-                        }
-                    }
-                    is HomeUiState.Error -> {
-                        ErrorState(
-                            message = state.message,
-                            onRetry = { viewModel.loadTemplates() }
-                        )
-                    }
-                    is HomeUiState.Success -> {
-                        HomeContent(
-                            state = state,
-                            onCategorySelect = { viewModel.selectCategory(it) },
-                            onTemplateClick = { template -> onNavigateToPreview(template.id) }
-                        )
-                    }
+                is HomeUiState.Error -> {
+                    ErrorState(
+                        message = state.message,
+                        onRetry = { viewModel.loadTemplates() }
+                    )
+                }
+                is HomeUiState.Success -> {
+                    HomeContent(
+                        state = state,
+                        onCategorySelect = { viewModel.selectCategory(it) },
+                        onTemplateClick = { template -> onNavigateToPreview(template.id) }
+                    )
                 }
             }
         }
@@ -299,36 +235,33 @@ fun TemplateItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f)
+            .aspectRatio(0.7f)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column {
-            // Template Preview Area
+            // Improved Template Preview Area: Show a mini renderer instead of just an alphabet
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
-                // Placeholder visualization
-                Surface(
-                    modifier = Modifier.fillMaxSize(0.8f),
-                    shape = RoundedCornerShape(4.dp),
-                    color = Color.White,
-                    shadowElevation = 4.dp
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.85f)
+                        .padding(8.dp)
+                        .shadow(4.dp, RoundedCornerShape(2.dp))
+                        .clip(RoundedCornerShape(2.dp))
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = template.name.firstOrNull()?.toString() ?: "?",
-                            fontSize = 40.sp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    }
+                    PosterRenderer(
+                        template = template,
+                        content = PosterContent(), // Use default template content for preview
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
             
@@ -342,9 +275,10 @@ fun TemplateItem(
                     text = template.name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(4.dp)

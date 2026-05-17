@@ -10,5 +10,7 @@ import kotlinx.serialization.Serializable
 data class PosterContent(
     val textMap: Map<String, String> = emptyMap(),
     val imageMap: Map<String, String> = emptyMap(),
-    val colorMap: Map<String, String> = emptyMap()
+    val colorMap: Map<String, String> = emptyMap(),
+    val userThemes: List<PosterTheme> = emptyList(),
+    val usageCount: Map<String, Int> = emptyMap() // Track how many times each content key was edited
 )

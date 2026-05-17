@@ -5,8 +5,37 @@
   "width": 360,
   "height": 560,
   "background": {
-    "color": "#FFE600"
+    "color": "#FFE600",
+    "colorKey": "background"
   },
+  "themes": [
+    {
+      "id": "theme_default",
+      "name": "Classic Yellow",
+      "colors": {
+        "background": "#FFE600",
+        "primary": "#2437A6",
+        "secondary": "#D62828",
+        "on_primary": "#FFFFFF",
+        "accent": "#FFF2A0",
+        "box_bg": "#FFFFFF",
+        "box_border": "#000000"
+      }
+    },
+    {
+      "id": "theme_premium",
+      "name": "Premium Maroon",
+      "colors": {
+        "background": "#FFF8E7",
+        "primary": "#7A1F1F",
+        "secondary": "#A52A2A",
+        "on_primary": "#FFF4C7",
+        "accent": "#FFE8B3",
+        "box_bg": "#FFF3D6",
+        "box_border": "#B8860B"
+      }
+    }
+  ],
   "elements": [
     {
       "type": "banner",
@@ -19,6 +48,7 @@
       "color": "#00000000",
       "borderWidth": 4,
       "borderColor": "#2437A6",
+      "borderColorKey": "primary",
       "cornerRadius": 0
     },
     {
@@ -33,10 +63,12 @@
       "text": "70 वर्षों की विश्वसनीय दुकान",
       "fontSize": 12,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "START",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 1
     },
     {
       "type": "text",
@@ -50,10 +82,12 @@
       "text": "शुद्धता ही हमारी पहचान",
       "fontSize": 12,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "END",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 1
     },
     {
       "type": "text",
@@ -67,10 +101,12 @@
       "text": "थोक रेट में फुटकर खरीदें",
       "fontSize": 16,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 2
     },
     {
       "type": "text",
@@ -84,12 +120,14 @@
       "text": "जायसवाल गहना केन्द्र",
       "fontSize": 38,
       "color": "#D62828",
+      "colorKey": "secondary",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
       "lineHeightMultiplier": 1.0,
       "strokeWidth": 2,
-      "strokeColor": "#FFFFFF"
+      "strokeColor": "#FFFFFF",
+      "priority": 10
     },
     {
       "type": "text",
@@ -103,12 +141,14 @@
       "text": "साड़ी सूट संसार & रेडीमेड स्टोर",
       "fontSize": 28,
       "color": "#D62828",
+      "colorKey": "secondary",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
       "lineHeightMultiplier": 1.0,
       "strokeWidth": 1,
-      "strokeColor": "#FFFFFF"
+      "strokeColor": "#FFFFFF",
+      "priority": 9
     },
     {
       "type": "banner",
@@ -119,9 +159,11 @@
       "height": 65,
       "zIndex": 1,
       "color": "#FFFFFF",
+      "colorKey": "box_bg",
       "cornerRadius": 10,
       "borderWidth": 2,
-      "borderColor": "#000000"
+      "borderColor": "#000000",
+      "borderColorKey": "box_border"
     },
     {
       "type": "text",
@@ -135,10 +177,12 @@
       "text": "सोने का भाव-\nप्रति 10 ग्राम",
       "fontSize": 20,
       "color": "#000000",
+      "colorKey": "box_border",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 5
     },
     {
       "type": "image",
@@ -152,6 +196,7 @@
       "cornerRadius": 10,
       "borderWidth": 2,
       "borderColor": "#2437A6",
+      "borderColorKey": "primary",
       "imageUrl": "https://i.postimg.cc/sD9vfgcj/e208e400-4774-44f5-bc47-b866d47efaab.png"
     },
     {
@@ -166,10 +211,12 @@
       "text": "प्रो०- केशवलाल जायसवाल (मायंग वाले)",
       "fontSize": 12,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "START",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 8
     },
     {
       "type": "text",
@@ -183,10 +230,12 @@
       "text": "शैलेन्द्र कुमार जायसवाल",
       "fontSize": 12,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "START",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 7
     },
     {
       "type": "text",
@@ -200,10 +249,12 @@
       "text": "मो०- 7905385115",
       "fontSize": 13,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BLACK",
       "textAlign": "START",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 7
     },
     {
       "type": "banner",
@@ -213,7 +264,8 @@
       "width": 352,
       "height": 34,
       "zIndex": 1,
-      "color": "#2437A6"
+      "color": "#2437A6",
+      "colorKey": "primary"
     },
     {
       "type": "text",
@@ -227,10 +279,12 @@
       "text": "100 % वापसी Hall Mark, HUID गहनों पर",
       "fontSize": 16,
       "color": "#FFFFFF",
+      "colorKey": "on_primary",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 3
     },
     {
       "type": "text",
@@ -244,10 +298,12 @@
       "text": "100 % एक्सचेंज मूल्य आपके पुराने सोने के 18 व 22 कैरेट के\nगहनों से किसी ज्वेलरी के खरीद पर उपलब्ध है।\nसिल चाँदी के भाव में 15% की छूट (उदाहरण- 1,00,000/- के\nमात्र पर 15,000/- की छूट)",
       "fontSize": 13,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.2
+      "lineHeightMultiplier": 1.2,
+      "priority": 3
     },
     {
       "type": "banner",
@@ -257,7 +313,8 @@
       "width": 352,
       "height": 45,
       "zIndex": 1,
-      "color": "#FFF2A0"
+      "color": "#FFF2A0",
+      "colorKey": "accent"
     },
     {
       "type": "text",
@@ -271,10 +328,12 @@
       "text": "साड़ी-सूट पर 10% व रेडीमेड कपड़ों पर 10 से 30%\nतक का डिस्काउंट उपलब्ध।",
       "fontSize": 14,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 3
     },
     {
       "type": "text",
@@ -288,10 +347,12 @@
       "text": "➜ उद्देश्य : ग्राहकों को सोने-चाँदी के जेवर थोक रेट में उपलब्ध कराना है।",
       "fontSize": 13,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BOLD",
       "textAlign": "START",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 3
     },
     {
       "type": "banner",
@@ -302,8 +363,10 @@
       "height": 30,
       "zIndex": 1,
       "color": "#FFFFFF",
+      "colorKey": "box_bg",
       "borderWidth": 2,
-      "borderColor": "#2437A6"
+      "borderColor": "#2437A6",
+      "borderColorKey": "box_border"
     },
     {
       "type": "text",
@@ -317,10 +380,12 @@
       "text": "बम्पर ऑफर उपलब्ध है।",
       "fontSize": 18,
       "color": "#2437A6",
+      "colorKey": "primary",
       "fontWeight": "BLACK",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 4
     },
     {
       "type": "banner",
@@ -330,7 +395,8 @@
       "width": 352,
       "height": 30,
       "zIndex": 1,
-      "color": "#2437A6"
+      "color": "#2437A6",
+      "colorKey": "primary"
     },
     {
       "type": "text",
@@ -344,10 +410,12 @@
       "text": "पता- निकट केनरा बैंक, ब्लाक धनपतगंज-सुलतानपुर",
       "fontSize": 13,
       "color": "#FFFFFF",
+      "colorKey": "on_primary",
       "fontWeight": "BOLD",
       "textAlign": "CENTER",
       "verticalAlignment": "CENTER",
-      "lineHeightMultiplier": 1.1
+      "lineHeightMultiplier": 1.1,
+      "priority": 6
     }
   ]
 }

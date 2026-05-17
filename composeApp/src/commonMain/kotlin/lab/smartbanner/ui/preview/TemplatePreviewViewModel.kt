@@ -13,13 +13,15 @@ import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
+import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.utils.PosterExporter
 
 sealed class PreviewUiState {
     object Loading : PreviewUiState()
     data class Success(
         val template: PosterTemplate,
-        val content: PosterContent
+        val content: PosterContent,
+        val selectedThemeId: String? = null
     ) : PreviewUiState()
     data class Error(val message: String) : PreviewUiState()
 }
@@ -53,7 +55,6 @@ class TemplatePreviewViewModel(
                 val template = repository.getTemplateById(id)
                 if (template != null) {
                     val content = initialContent ?: run {
-                        // Priority: 1. Active Draft (if same template), 2. Saved Template Content, 3. Default
                         val draft = draftRepository.getLatestDraft().first()
                         if (draft?.templateId == id) {
                             draft.content
@@ -62,7 +63,13 @@ class TemplatePreviewViewModel(
                         }
                     }
                     this@TemplatePreviewViewModel.originalContent = content
-                    _uiState.value = PreviewUiState.Success(template, content)
+                    
+                    val allThemes = template.themes + content.userThemes
+                    val selectedThemeId = allThemes.find { theme ->
+                        theme.colors == content.colorMap
+                    }?.id
+                    
+                    _uiState.value = PreviewUiState.Success(template, content, selectedThemeId)
                 } else {
                     _uiState.value = PreviewUiState.Error("Template not found")
                 }
@@ -72,29 +79,104 @@ class TemplatePreviewViewModel(
         }
     }
 
-    fun updateTextContent(key: String, value: String) {
+    fun applyTheme(theme: PosterTheme) {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
             val updatedContent = currentState.content.copy(
-                textMap = currentState.content.textMap + (key to value)
+                colorMap = theme.colors
             )
-            
-            // Update UI state immediately
-            _uiState.value = currentState.copy(content = updatedContent)
-            
-            // Debounce active draft saving
-            saveJob?.cancel()
-            saveJob = viewModelScope.launch {
-                delay(300)
-                draftRepository.saveDraft(PosterDraft(currentState.template.id, updatedContent))
-            }
+            _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
+            autoSave(updatedContent, currentState.template.id)
         }
     }
 
-    /**
-     * Saves the current content specifically for this template AND as an active draft.
-     * Only saves if the content has been modified.
-     */
+    fun addUserTheme(theme: PosterTheme) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val updatedUserThemes = currentState.content.userThemes.toMutableList()
+            val existingIndex = updatedUserThemes.indexOfFirst { it.id == theme.id }
+            if (existingIndex != -1) {
+                updatedUserThemes[existingIndex] = theme
+            } else {
+                updatedUserThemes.add(theme)
+            }
+
+            val updatedContent = currentState.content.copy(
+                userThemes = updatedUserThemes,
+                colorMap = theme.colors
+            )
+            _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
+            autoSave(updatedContent, currentState.template.id)
+        }
+    }
+
+    fun deleteUserTheme(themeId: String) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val updatedUserThemes = currentState.content.userThemes.filter { it.id != themeId }
+            val updatedContent = currentState.content.copy(userThemes = updatedUserThemes)
+            
+            val isSelectedThemeDeleted = currentState.selectedThemeId == themeId
+            val newSelectedThemeId = if (isSelectedThemeDeleted) null else currentState.selectedThemeId
+            
+            _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = newSelectedThemeId)
+            autoSave(updatedContent, currentState.template.id)
+        }
+    }
+
+    fun updateColor(key: String, hexColor: String) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val updatedColors = currentState.content.colorMap.toMutableMap()
+            updatedColors[key] = hexColor
+            val updatedContent = currentState.content.copy(colorMap = updatedColors)
+            
+            val allThemes = currentState.template.themes + currentState.content.userThemes
+            val matchingThemeId = allThemes.find { it.colors == updatedColors }?.id
+            
+            _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = matchingThemeId)
+            autoSave(updatedContent, currentState.template.id)
+        }
+    }
+
+    fun updateTextContent(key: String, value: String) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val currentUsage = currentState.content.usageCount[key] ?: 0
+            val updatedUsage = currentState.content.usageCount + (key to currentUsage + 1)
+            
+            val updatedContent = currentState.content.copy(
+                textMap = currentState.content.textMap + (key to value),
+                usageCount = updatedUsage
+            )
+            _uiState.value = currentState.copy(content = updatedContent)
+            autoSave(updatedContent, currentState.template.id)
+        }
+    }
+
+    fun updateImageContent(key: String, url: String) {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            val currentUsage = currentState.content.usageCount[key] ?: 0
+            val updatedUsage = currentState.content.usageCount + (key to currentUsage + 1)
+            
+            val updatedContent = currentState.content.copy(
+                imageMap = currentState.content.imageMap + (key to url),
+                usageCount = updatedUsage
+            )
+            _uiState.value = currentState.copy(content = updatedContent)
+            autoSave(updatedContent, currentState.template.id)
+        }
+    }
+
+    private fun autoSave(content: PosterContent, templateId: String) {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            delay(300)
+            draftRepository.saveDraft(PosterDraft(templateId, content))
+        }
+    }
+
     suspend fun saveCurrentDraft() {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
@@ -107,9 +189,6 @@ class TemplatePreviewViewModel(
         }
     }
 
-    /**
-     * Called when the user is "Done". Persists content for the template and clears the resume prompt.
-     */
     suspend fun completeEditing() {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
@@ -124,7 +203,7 @@ class TemplatePreviewViewModel(
         if (currentState is PreviewUiState.Success) {
             viewModelScope.launch {
                 val timestamp = Clock.System.now().toEpochMilliseconds()
-                val fileName = "PosterWala_${currentState.template.id}_$timestamp"
+                val fileName = "SmartBanner_${currentState.template.id}_$timestamp"
                 val result = posterExporter.saveToGallery(bitmap, fileName)
                 _exportResult.emit(result)
             }

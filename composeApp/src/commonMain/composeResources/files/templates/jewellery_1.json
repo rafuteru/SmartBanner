@@ -6,32 +6,58 @@
   "height": 1350.0,
   "background": {
     "color": "#0A0A0A",
-    "contentKey": "bg_color"
+    "colorKey": "background"
   },
+  "themes": [
+    {
+      "id": "theme_royal_dark",
+      "name": "Royal Dark",
+      "colors": {
+        "background": "#0A0A0A",
+        "primary": "#D4AF37",
+        "secondary": "#1A1A1A",
+        "text_on_bg": "#E0E0E0",
+        "text_on_primary": "#000000"
+      }
+    },
+    {
+      "id": "theme_royal_white",
+      "name": "Ivory Gold",
+      "colors": {
+        "background": "#FFFFFF",
+        "primary": "#D4AF37",
+        "secondary": "#F5F5F5",
+        "text_on_bg": "#1A1A1A",
+        "text_on_primary": "#FFFFFF"
+      }
+    }
+  ],
   "elements": [
     {
       "type": "banner",
       "id": "border_top",
       "x": 40.0, "y": 40.0, "width": 1000.0, "height": 1270.0, "zIndex": 1,
-      "color": "transparent", "borderWidth": 2.0, "borderColor": "#D4AF37"
+      "color": "#00000000", "borderWidth": 2.0, "borderColor": "#D4AF37", "borderColorKey": "primary"
     },
     {
       "type": "banner",
       "id": "header_accent",
       "x": 0.0, "y": 0.0, "width": 1080.0, "height": 300.0, "zIndex": 2,
-      "color": "#1A1A1A"
+      "color": "#1A1A1A", "colorKey": "secondary"
     },
     {
       "type": "text",
       "id": "shop_name", "contentKey": "shop_name",
       "x": 0.0, "y": 80.0, "width": 1080.0, "height": 100.0, "zIndex": 3,
-      "text": "राजपूताना ज्वेलर्स", "fontSize": 85.0, "color": "#D4AF37", "fontWeight": "BOLD", "textAlign": "CENTER"
+      "text": "राजपूताना ज्वेलर्स", "fontSize": 85.0, "color": "#D4AF37", "colorKey": "primary", "fontWeight": "BOLD", "textAlign": "CENTER",
+      "priority": 10
     },
     {
       "type": "text",
       "id": "tagline", "contentKey": "tagline",
       "x": 0.0, "y": 185.0, "width": 1080.0, "height": 50.0, "zIndex": 3,
-      "text": "EXQUISITE CRAFTSMANSHIP SINCE 1950", "fontSize": 28.0, "color": "#FFFFFF", "letterSpacing": 4.0, "textAlign": "CENTER"
+      "text": "EXQUISITE CRAFTSMANSHIP SINCE 1950", "fontSize": 28.0, "color": "#FFFFFF", "colorKey": "text_on_primary", "letterSpacing": 4.0, "textAlign": "CENTER",
+      "priority": 5
     },
     {
       "type": "image",
@@ -44,37 +70,41 @@
       "type": "banner",
       "id": "offer_bg",
       "x": 540.0, "y": 880.0, "width": 440.0, "height": 120.0, "zIndex": 4,
-      "color": "#D4AF37", "cornerRadius": 60.0
+      "color": "#D4AF37", "colorKey": "primary", "cornerRadius": 60.0
     },
     {
       "type": "text",
       "id": "offer_text", "contentKey": "offer",
       "x": 540.0, "y": 910.0, "width": 440.0, "height": 60.0, "zIndex": 5,
-      "text": "FESTIVE 25% OFF", "fontSize": 38.0, "color": "#000000", "fontWeight": "BLACK", "textAlign": "CENTER"
+      "text": "FESTIVE 25% OFF", "fontSize": 38.0, "color": "#000000", "colorKey": "text_on_primary", "fontWeight": "BLACK", "textAlign": "CENTER",
+      "priority": 8
     },
     {
       "type": "text",
       "id": "description", "contentKey": "description",
       "x": 100.0, "y": 950.0, "width": 400.0, "height": 150.0, "zIndex": 3,
-      "text": "Discover our new bridal collection in 22K Gold and Lab-grown Diamonds.", "fontSize": 32.0, "color": "#E0E0E0", "textAlign": "START"
+      "text": "Discover our new bridal collection in 22K Gold and Lab-grown Diamonds.", "fontSize": 32.0, "color": "#E0E0E0", "colorKey": "text_on_bg", "textAlign": "START",
+      "priority": 3
     },
     {
       "type": "banner",
       "id": "footer_strip",
       "x": 0.0, "y": 1150.0, "width": 1080.0, "height": 200.0, "zIndex": 2,
-      "color": "#D4AF37"
+      "color": "#D4AF37", "colorKey": "primary"
     },
     {
       "type": "text",
       "id": "address", "contentKey": "address",
       "x": 50.0, "y": 1180.0, "width": 980.0, "height": 60.0, "zIndex": 3,
-      "text": "Chandni Chowk, New Delhi | +91 99999 88888", "fontSize": 34.0, "color": "#000000", "fontWeight": "BOLD", "textAlign": "CENTER"
+      "text": "Chandni Chowk, New Delhi | +91 99999 88888", "fontSize": 34.0, "color": "#000000", "colorKey": "text_on_primary", "fontWeight": "BOLD", "textAlign": "CENTER",
+      "priority": 7
     },
     {
       "type": "text",
       "id": "social", "contentKey": "social",
       "x": 0.0, "y": 1250.0, "width": 1080.0, "height": 40.0, "zIndex": 3,
-      "text": "www.rajputanajewels.com", "fontSize": 24.0, "color": "#000000", "textAlign": "CENTER"
+      "text": "www.rajputanajewels.com", "fontSize": 24.0, "color": "#000000", "colorKey": "text_on_primary", "textAlign": "CENTER",
+      "priority": 6
     }
   ]
 }

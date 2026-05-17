@@ -1,13 +1,13 @@
 package lab.smartbanner.ui.preview
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -25,8 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lab.smartbanner.model.TextElement
+import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.renderer.PosterRenderer
+import lab.smartbanner.ui.theme.SimpleColorPicker
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,14 +36,16 @@ import kotlinx.coroutines.launch
 fun TemplatePreviewScreen(
     templateId: String,
     viewModel: TemplatePreviewViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEditFields: (String) -> Unit,
+    onCreateTheme: (String) -> Unit,
+    onEditTheme: (String, String) -> Unit // themeId, templateId
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val graphicsLayer = rememberGraphicsLayer()
 
-    // Handle export results
     LaunchedEffect(Unit) {
         viewModel.exportResult.collect { result ->
             if (result.isSuccess) {
@@ -57,13 +61,8 @@ fun TemplatePreviewScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    val title =
-                        (uiState as? PreviewUiState.Success)?.template?.name ?: "Edit Poster"
-                    Text(
-                        title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    val title = (uiState as? PreviewUiState.Success)?.template?.name ?: "Preview"
+                    Text(title, fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -76,7 +75,6 @@ fun TemplatePreviewScreen(
                     }
                 },
                 actions = {
-                    // Export Button
                     IconButton(
                         onClick = {
                             scope.launch {
@@ -91,31 +89,30 @@ fun TemplatePreviewScreen(
                     ) {
                         Icon(Icons.Default.Download, contentDescription = "Export")
                     }
-
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                viewModel.completeEditing()
-                                onBack()
-                            }
-                        },
-                        modifier = Modifier.padding(end = 8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Done")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
+        },
+        bottomBar = {
+            if (uiState is PreviewUiState.Success) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp
+                ) {
+                    Button(
+                        onClick = { onEditFields(templateId) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("Edit Details", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Default.ArrowForward, contentDescription = null)
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -126,21 +123,20 @@ fun TemplatePreviewScreen(
             when (val state = uiState) {
                 is PreviewUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(strokeWidth = 3.dp)
+                        CircularProgressIndicator()
                     }
                 }
-
                 is PreviewUiState.Error -> {
-                    PreviewErrorState(
-                        message = state.message,
-                        onRetry = { viewModel.loadTemplate(templateId) })
+                    Text(state.message, color = MaterialTheme.colorScheme.error)
                 }
-
                 is PreviewUiState.Success -> {
-                    PreviewEditorContent(
+                    PreviewContent(
+                        templateId = templateId,
                         state = state,
                         viewModel = viewModel,
-                        graphicsLayer = graphicsLayer
+                        graphicsLayer = graphicsLayer,
+                        onCreateTheme = onCreateTheme,
+                        onEditTheme = onEditTheme
                     )
                 }
             }
@@ -148,11 +144,15 @@ fun TemplatePreviewScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PreviewEditorContent(
+private fun PreviewContent(
+    templateId: String,
     state: PreviewUiState.Success,
     viewModel: TemplatePreviewViewModel,
-    graphicsLayer: androidx.compose.ui.graphics.layer.GraphicsLayer
+    graphicsLayer: androidx.compose.ui.graphics.layer.GraphicsLayer,
+    onCreateTheme: (String) -> Unit,
+    onEditTheme: (String, String) -> Unit
 ) {
     val template = state.template
     val content = state.content
@@ -162,201 +162,204 @@ private fun PreviewEditorContent(
         template.width / template.height
     }
 
+    var themeToDelete by remember { mutableStateOf<PosterTheme?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-            )
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Poster Preview Section
+        // Banner Preview
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .aspectRatio(posterAspectRatio)
+                .shadow(8.dp)
+                .background(Color.White)
+                .drawWithContent {
+                    graphicsLayer.record {
+                        this@drawWithContent.drawContent()
+                    }
+                    drawContent()
+                }
+        ) {
+            PosterRenderer(
+                template = template,
+                content = content,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Theme Selection
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Themes",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            TextButton(onClick = { onCreateTheme(templateId) }) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Add Theme")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            // Predefined Themes (Not editable)
+            items(template.themes) { theme ->
+                val isSelected = state.selectedThemeId == theme.id
+                ThemeItem(
+                    name = theme.name,
+                    swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                    isSelected = isSelected,
+                    onClick = { viewModel.applyTheme(theme) }
+                )
+            }
+            
+            // User Custom Themes (Editable & Deletable)
+            items(content.userThemes) { theme ->
+                val isSelected = state.selectedThemeId == theme.id
+                ThemeItem(
+                    name = theme.name,
+                    swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                    isSelected = isSelected,
+                    onClick = { viewModel.applyTheme(theme) },
+                    onEdit = { onEditTheme(theme.id, templateId) },
+                    onDelete = { themeToDelete = theme }
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(60.dp))
+    }
+
+    // Delete Confirmation Dialog
+    if (themeToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { themeToDelete = null },
+            title = { Text("Delete Theme") },
+            text = { Text("Are you sure you want to delete '${themeToDelete!!.name}'?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteUserTheme(themeToDelete!!.id)
+                        themeToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { themeToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ThemeItem(
+    name: String,
+    swatchColor: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onEdit: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(parseColor(swatchColor)))
+                .border(
+                    width = if (isSelected) 3.5.dp else 1.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .clickable { onClick() },
             contentAlignment = Alignment.Center
         ) {
-            // Using a Box with shadow and explicit border for clear boundaries
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .aspectRatio(posterAspectRatio)
-                    .shadow(8.dp, RoundedCornerShape(0.dp))
-                    .background(Color.White)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(0.dp))
-                    .drawWithContent {
-                        // Capture logic
-                        graphicsLayer.record {
-                            this@drawWithContent.drawContent()
-                        }
-                        drawContent()
-                    }
-            ) {
-                PosterRenderer(
-                    template = template,
-                    content = content,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-
-
-        // Editor Controls
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(
-                topStart = 32.dp,
-                topEnd = 32.dp
-            ),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 24.dp)
-                    .fillMaxWidth()
-            ) {
-
-                // Drag Handle
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+            } else if (isSelected) {
                 Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                        .background(
-                            MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(2.dp)
-                        )
-                        .align(Alignment.CenterHorizontally)
-                )
+                    modifier = Modifier.size(24.dp).background(Color.White.copy(alpha = 0.8f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        Text(
+            name, 
+            fontSize = 11.sp, 
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                SectionHeader(
-                    title = "Poster Content",
-                    icon = Icons.Default.TextFields
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                template.elements
-                    .filterIsInstance<TextElement>()
-                    .filter { it.contentKey != null }
-                    .distinctBy { it.contentKey }
-                    .forEach { element ->
-
-                        val key = element.contentKey!!
-                        val currentValue =
-                            content.textMap[key] ?: element.text
-
-                        // Identify fields that typically contain multiline/long content
-                        val isMultilinePreference = key.contains("address", true) || 
-                                                  key.contains("footer", true) || 
-                                                  key.contains("discount", true) || 
-                                                  key.contains("offer", true) ||
-                                                  key.contains("exchange", true) ||
-                                                  key.contains("message", true)
-
-                        OutlinedTextField(
-                            value = currentValue,
-                            onValueChange = {
-                                viewModel.updateTextContent(
-                                    key,
-                                    it
-                                )
-                            },
-                            label = {
-                                Text(
-                                    key
-                                        .replace("_", " ")
-                                        .replaceFirstChar { c ->
-                                            c.uppercase()
-                                        }
-                                )
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(12.dp),
-
-                            leadingIcon = {
-                                val icon = when {
-                                    key.contains("offer", true) || 
-                                    key.contains("rate", true) || 
-                                    key.contains("discount", true) -> Icons.Default.LocalOffer
-                                    
-                                    key.contains("shop", true) -> Icons.Default.Store
-                                    key.contains("address", true) || key.contains("footer", true) -> Icons.Default.LocationOn
-                                    key.contains("owner", true) || key.contains("phone", true) -> Icons.Default.Person
-                                    else -> Icons.Default.Edit
-                                }
-
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-
-                            // Ensure multiline is supported for all fields, with extra space for long ones
-                            minLines = if (isMultilinePreference) 3 else 1,
-                            maxLines = 10,
-                            singleLine = false
-                        )
+        // Show edit/delete options for user themes
+        if (onEdit != null || onDelete != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                onEdit?.let {
+                    IconButton(onClick = it, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
                     }
-
-                Spacer(modifier = Modifier.height(40.dp))
+                }
+                onDelete?.let {
+                    IconButton(onClick = it, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
+                    }
+                }
             }
         }
     }
 }
 
-@Composable
-private fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            letterSpacing = 0.5.sp
-        )
-    }
-}
-
-@Composable
-private fun PreviewErrorState(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            Icons.Default.ErrorOutline,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = onRetry) {
-            Text("Retry")
+fun parseColor(hex: String): Int {
+    return try {
+        if (hex.startsWith("#")) {
+            val h = hex.substring(1)
+            if (h.length == 6) {
+                (0xFF000000 or h.toLong(16)).toInt()
+            } else if (h.length == 8) {
+                h.toLong(16).toInt()
+            } else {
+                0xFF000000.toInt()
+            }
+        } else {
+            0xFF000000.toInt()
         }
+    } catch (e: Exception) {
+        0xFF000000.toInt()
     }
 }

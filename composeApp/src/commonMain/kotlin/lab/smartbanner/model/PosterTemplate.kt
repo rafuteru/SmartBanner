@@ -12,14 +12,23 @@ data class PosterTemplate(
     val width: Float = 1080f,
     val height: Float = 1350f,
     val background: BackgroundConfig = BackgroundConfig(),
-    val elements: List<ElementConfig> = emptyList()
+    val elements: List<ElementConfig> = emptyList(),
+    val themes: List<PosterTheme> = emptyList()
+)
+
+@Serializable
+data class PosterTheme(
+    val id: String,
+    val name: String,
+    val colors: Map<String, String> // Map of colorKey to hex color
 )
 
 @Serializable
 data class BackgroundConfig(
     val color: String = "#FFFFFF",
     val imageUrl: String? = null,
-    val contentKey: String? = null
+    val contentKey: String? = null,
+    val colorKey: String? = null
 )
 
 @Serializable
@@ -57,7 +66,9 @@ data class TextElement(
     val strokeWidth: Float = 0f,
     val strokeColor: String? = null,
     val contentKey: String? = null,
-    val colorKey: String? = null
+    val colorKey: String? = null,
+    val strokeColorKey: String? = null,
+    val priority: Int = 0 // Higher priority fields shown first
 ) : ElementConfig()
 
 @Serializable
@@ -73,7 +84,8 @@ data class ImageElement(
     val cornerRadius: Float = 0f,
     val borderWidth: Float = 0f,
     val borderColor: String? = null,
-    val contentKey: String? = null
+    val contentKey: String? = null,
+    val borderColorKey: String? = null
 ) : ElementConfig()
 
 @Serializable
@@ -90,5 +102,6 @@ data class BannerElement(
     val alpha: Float = 1.0f,
     val borderWidth: Float = 0f,
     val borderColor: String? = null,
-    val colorKey: String? = null
+    val colorKey: String? = null,
+    val borderColorKey: String? = null
 ) : ElementConfig()

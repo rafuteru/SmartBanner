@@ -12,11 +12,6 @@ import lab.smartbanner.ui.components.DynamicImage
 import lab.smartbanner.ui.components.DynamicText
 import lab.smartbanner.ui.components.PosterCanvas
 
-/**
- * The core engine that renders a complete [PosterTemplate].
- * It handles the coordinate system, scaling, and layering of all elements.
- * Supports dynamic content mapping via [PosterContent].
- */
 @Composable
 fun PosterRenderer(
     template: PosterTemplate,
@@ -24,7 +19,9 @@ fun PosterRenderer(
     content: PosterContent = PosterContent()
 ) {
     // Resolve background color
-    val backgroundColor = template.background.contentKey?.let { key ->
+    val backgroundColor = template.background.colorKey?.let { key ->
+        content.colorMap[key]
+    } ?: template.background.contentKey?.let { key ->
         content.colorMap[key]
     } ?: template.background.color
 
@@ -34,44 +31,61 @@ fun PosterRenderer(
         ),
         modifier = modifier
     ) { scale ->
-        // Layering: Elements with higher zIndex are drawn on top
         template.elements.sortedBy { it.zIndex }.forEach { element ->
             when (element) {
                 is TextElement -> {
-                    // Map content if contentKey is present, otherwise fallback to template default
                     val displayText = element.contentKey?.let { key ->
                         content.textMap[key]
                     } ?: element.text
 
-                    // Map color if colorKey is present
                     val displayColor = element.colorKey?.let { key ->
                         content.colorMap[key]
                     } ?: element.color
 
+                    val displayStrokeColor = element.strokeColorKey?.let { key ->
+                        content.colorMap[key]
+                    } ?: element.strokeColor
+
                     DynamicText(
-                        element = element.copy(text = displayText, color = displayColor),
+                        element = element.copy(
+                            text = displayText, 
+                            color = displayColor,
+                            strokeColor = displayStrokeColor
+                        ),
                         scale = scale
                     )
                 }
                 is ImageElement -> {
-                    // Map image URL if contentKey is present, otherwise fallback to template default
                     val displayUrl = element.contentKey?.let { key ->
                         content.imageMap[key]
                     } ?: element.imageUrl
 
+                    val displayBorderColor = element.borderColorKey?.let { key ->
+                        content.colorMap[key]
+                    } ?: element.borderColor
+
                     DynamicImage(
-                        element = element.copy(imageUrl = displayUrl),
+                        element = element.copy(
+                            imageUrl = displayUrl,
+                            borderColor = displayBorderColor
+                        ),
                         scale = scale
                     )
                 }
                 is BannerElement -> {
-                    // Map color if colorKey is present
                     val displayColor = element.colorKey?.let { key ->
                         content.colorMap[key]
                     } ?: element.color
 
+                    val displayBorderColor = element.borderColorKey?.let { key ->
+                        content.colorMap[key]
+                    } ?: element.borderColor
+
                     DynamicBanner(
-                        element = element.copy(color = displayColor),
+                        element = element.copy(
+                            color = displayColor,
+                            borderColor = displayBorderColor
+                        ),
                         scale = scale
                     )
                 }

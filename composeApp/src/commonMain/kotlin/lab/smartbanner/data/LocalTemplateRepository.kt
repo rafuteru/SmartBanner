@@ -12,12 +12,10 @@ class LocalTemplateRepository : TemplateRepository {
         coerceInputValues = true
     }
 
-    // Paths are relative to the composeResources root.
-    // Our files are in src/commonMain/composeResources/files/templates/
+    // jewellery_3 is now a theme of jewellery_2
     private val templatePaths = listOf(
         "files/templates/jewellery_1.json",
         "files/templates/jewellery_2.json",
-        "files/templates/jewellery_3.json",
         "files/templates/festival_1.json",
         "files/templates/clothing_1.json",
         "files/templates/grocery_1.json",
@@ -37,7 +35,6 @@ class LocalTemplateRepository : TemplateRepository {
             }
         }.toMutableList()
 
-        // Fallback hardcoded template if nothing is loaded to ensure UI works
         if (loadedTemplates.isEmpty()) {
             loadedTemplates.add(
                 PosterTemplate(

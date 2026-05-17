@@ -9,4 +9,10 @@ sealed class Screen {
     
     @Serializable
     data class TemplatePreview(val templateId: String) : Screen()
+
+    @Serializable
+    data class EditFields(val templateId: String) : Screen()
+
+    @Serializable
+    data class CreateTheme(val templateId: String, val themeId: String? = null) : Screen()
 }

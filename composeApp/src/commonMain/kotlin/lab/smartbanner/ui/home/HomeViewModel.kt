@@ -5,12 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import lab.smartbanner.domain.DraftRepository
-import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterTemplate
 
@@ -31,9 +27,6 @@ class HomeViewModel(
 
     var uiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
         private set
-
-    val latestDraft: StateFlow<PosterDraft?> = draftRepository.getLatestDraft()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
         loadTemplates()
@@ -60,12 +53,6 @@ class HomeViewModel(
         val currentState = uiState
         if (currentState is HomeUiState.Success) {
             uiState = currentState.copy(selectedCategory = category)
-        }
-    }
-
-    fun clearDraft() {
-        viewModelScope.launch {
-            draftRepository.clearActiveDraft()
         }
     }
 }

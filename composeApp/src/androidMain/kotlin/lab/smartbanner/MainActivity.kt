@@ -17,6 +17,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        
+        initializePlatform(this)
 
         setContent {
             val context = LocalContext.current
@@ -37,6 +39,4 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    // For preview, we might need mock implementations or just provide dummy ones
-    // but since this is just a preview, we can leave it or fix it if needed.
 }
