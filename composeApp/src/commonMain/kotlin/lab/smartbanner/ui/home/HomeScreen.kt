@@ -70,7 +70,7 @@ fun HomeScreen(
                                 letterSpacing = 1.2.sp
                             )
                         )
-                        if (viewModel.currentIdentifier.isNotEmpty()) {
+                        if (viewModel.currentIdentifier.isNotBlank()) {
                             Text(
                                 text = "Access Code: $maskedCode",
                                 style = MaterialTheme.typography.labelSmall,
@@ -93,10 +93,11 @@ fun HomeScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
+                    val codeToSend = if (viewModel.currentIdentifier.isBlank()) "NA" else viewModel.currentIdentifier
                     getPlatform().openEmail(
                         recipient = "coffeeat202labs@gmail.com",
                         subject = "Custom Design Request",
-                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: ${viewModel.currentIdentifier}\n\n[Send your design we will add a theme for you.]"
+                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: $codeToSend\n\n[Send your design we will add a theme for you.]"
                     )
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -148,7 +149,8 @@ fun HomeScreen(
                     
                     Button(
                         onClick = { 
-                            clipboardManager.setText(AnnotatedString(viewModel.currentIdentifier))
+                            val codeToCopy = if (viewModel.currentIdentifier.isBlank()) "NA" else viewModel.currentIdentifier
+                            clipboardManager.setText(AnnotatedString(codeToCopy))
                             showIdDialog = false
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -161,22 +163,30 @@ fun HomeScreen(
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.clickable { isCodeVisible = !isCodeVisible }
-                    ) {
+                    if (viewModel.currentIdentifier.isNotBlank()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.clickable { isCodeVisible = !isCodeVisible }
+                        ) {
+                            Text(
+                                text = "Code: " + if (isCodeVisible) viewModel.currentIdentifier else maskedCode,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = if (isCodeVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (isCodeVisible) "Hide" else "Show",
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    } else {
                         Text(
-                            text = "Code: " + if (isCodeVisible) viewModel.currentIdentifier else maskedCode,
+                            text = "Code: NA",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = if (isCodeVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (isCodeVisible) "Hide" else "Show",
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
                 }

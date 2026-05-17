@@ -43,11 +43,6 @@ class AccessCodeRepositoryImpl(
     }
 
     override suspend fun signInWithCode(code: String) {
-        if (code.isBlank()) {
-            _authState.value = AuthState.Error("Please enter an access code.")
-            return
-        }
-
         _authState.value = AuthState.Loading
         
         try {

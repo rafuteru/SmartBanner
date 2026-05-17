@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil3.compose.setSingletonImageLoaderFactory
 import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.AuthState
 import lab.smartbanner.navigation.Screen
@@ -22,6 +23,10 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
+    setSingletonImageLoaderFactory { context ->
+        getPlatform().createImageLoader(context)
+    }
+
     PosterWalaTheme {
         val navController = rememberNavController()
         val accessCodeRepository: AccessCodeRepository = koinInject()

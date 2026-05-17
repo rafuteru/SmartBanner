@@ -22,6 +22,7 @@ firebase-kotlin = "2.1.0"
 google-services = "4.4.2"
 firebase-crashlytics-plugin = "3.0.7"
 koin = "4.0.0"
+ktor = "3.0.0"
 
 [libraries]
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
@@ -49,6 +50,8 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 firebase-config = { module = "dev.gitlive:firebase-config", version.ref = "firebase-kotlin" }
 firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-kotlin" }

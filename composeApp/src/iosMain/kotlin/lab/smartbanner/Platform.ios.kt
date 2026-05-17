@@ -1,5 +1,8 @@
 package lab.smartbanner
 
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import platform.UIKit.UIDevice
 import platform.UIKit.UIApplication
 import platform.Foundation.NSURL
@@ -17,6 +20,14 @@ class IOSPlatform: Platform {
         if (url != null && UIApplication.sharedApplication.canOpenURL(url)) {
             UIApplication.sharedApplication.openURL(url)
         }
+    }
+
+    override fun createImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .components {
+                add(KtorNetworkFetcherFactory())
+            }
+            .build()
     }
 }
 

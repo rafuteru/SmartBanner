@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 
 class AndroidPlatform(private val context: Context?) : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -38,6 +41,14 @@ class AndroidPlatform(private val context: Context?) : Platform {
                 }
             }
         }
+    }
+
+    override fun createImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .components {
+                add(OkHttpNetworkFetcherFactory())
+            }
+            .build()
     }
 }
 

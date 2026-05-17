@@ -20,7 +20,8 @@ class AuthViewModel(
 
     fun signInWithCode(code: String) {
         viewModelScope.launch {
-            authRepository.signInWithCode(code)
+            val trimmedCode = code.trim()
+            authRepository.signInWithCode(trimmedCode)
             // Refresh config immediately after sign in to fetch user-specific templates
             configRepository.refresh()
         }

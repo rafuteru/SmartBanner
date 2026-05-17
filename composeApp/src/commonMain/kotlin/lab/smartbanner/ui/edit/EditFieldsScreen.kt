@@ -1,5 +1,7 @@
 package lab.smartbanner.ui.edit
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +32,7 @@ fun EditFieldsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     // Local state to hold changes before saving
     var localContent by remember(uiState) {
@@ -41,13 +44,17 @@ fun EditFieldsScreen(
             TopAppBar(
                 title = { Text("Edit Details", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        focusManager.clearFocus()
+                        onBack()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     TextButton(
                         onClick = {
+                            focusManager.clearFocus()
                             viewModel.updateContent(localContent)
                             onBack()
                         }
@@ -58,10 +65,17 @@ fun EditFieldsScreen(
             )
         }
     ) { paddingValues ->
+        // Tap outside to dismiss keyboard
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    focusManager.clearFocus()
+                }
         ) {
             when (val state = uiState) {
                 is PreviewUiState.Success -> {
@@ -71,6 +85,12 @@ fun EditFieldsScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                focusManager.clearFocus()
+                            }
                             .padding(16.dp)
                     ) {
                         // 1. Image Elements Section
