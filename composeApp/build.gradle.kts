@@ -107,4 +107,5 @@ compose.resources {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     debugImplementation(libs.compose.uiTooling)
+    implementation(platform(libs.firebase.bom))
 }

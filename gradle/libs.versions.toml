@@ -18,6 +18,7 @@ kotlinx-serialization = "1.7.3"
 kotlinx-datetime = "0.6.1"
 coil = "3.0.0-rc01"
 datastore = "1.1.1"
+firebase-bom = "33.7.0"
 firebase-kotlin = "2.1.0"
 google-services = "4.4.2"
 firebase-crashlytics-plugin = "3.0.7"
@@ -53,6 +54,7 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-config = { module = "dev.gitlive:firebase-config", version.ref = "firebase-kotlin" }
 firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-kotlin" }
 firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-kotlin" }
