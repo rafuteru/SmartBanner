@@ -15,7 +15,14 @@ data class PosterTemplate(
     val elements: List<ElementConfig> = emptyList(),
     val themes: List<PosterTheme> = emptyList(),
     val config: TemplateConfig = TemplateConfig()
-)
+    ) {
+    /**
+     * Calculates the height required to fit all elements, 
+     * ensuring it's at least the base [height].
+     */
+    val intrinsicHeight: Float
+        get() = elements.maxOfOrNull { it.y + it.height }?.let { maxOf(it, height) } ?: height
+}
 
 @Serializable
 data class TemplateConfig(

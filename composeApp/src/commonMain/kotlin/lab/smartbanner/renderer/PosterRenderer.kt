@@ -25,13 +25,17 @@ fun PosterRenderer(
         content.colorMap[key]
     } ?: template.background.color
 
+    // Use intrinsicHeight to allow the canvas to grow if elements are added further down
+    val renderingTemplate = template.copy(
+        height = template.intrinsicHeight,
+        background = template.background.copy(color = backgroundColor)
+    )
+
     PosterCanvas(
-        template = template.copy(
-            background = template.background.copy(color = backgroundColor)
-        ),
+        template = renderingTemplate,
         modifier = modifier
     ) { scale ->
-        template.elements.sortedBy { it.zIndex }.forEach { element ->
+        renderingTemplate.elements.sortedBy { it.zIndex }.forEach { element ->
             when (element) {
                 is TextElement -> {
                     val displayText = element.contentKey?.let { key ->

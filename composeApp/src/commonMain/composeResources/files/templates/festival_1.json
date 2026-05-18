@@ -42,13 +42,13 @@
     },
     {
       "type": "image",
-      "id": "diya_left",
+      "id": "diya_left", "contentKey": "left_diya",
       "x": 50.0, "y": 50.0, "width": 200.0, "height": 200.0, "zIndex": 2,
       "imageUrl": "https://images.unsplash.com/photo-1605128362691-88f57f6874c9?auto=format&fit=crop&w=300&q=80"
     },
     {
       "type": "image",
-      "id": "diya_right",
+      "id": "diya_right", "contentKey": "right_diya",
       "x": 830.0, "y": 50.0, "width": 200.0, "height": 200.0, "zIndex": 2,
       "imageUrl": "https://images.unsplash.com/photo-1605128362691-88f57f6874c9?auto=format&fit=crop&w=300&q=80"
     },
@@ -68,7 +68,7 @@
     },
     {
       "type": "image",
-      "id": "main_illustration",
+      "id": "main_illustration", "contentKey": "hero_image",
       "x": 140.0, "y": 650.0, "width": 800.0, "height": 450.0, "zIndex": 2,
       "imageUrl": "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&get=80",
       "cornerRadius": 20.0

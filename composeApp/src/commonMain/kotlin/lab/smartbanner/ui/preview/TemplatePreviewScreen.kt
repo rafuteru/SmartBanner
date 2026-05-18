@@ -194,8 +194,9 @@ private fun PreviewContent(
     val isLocked = state.isLocked
     val scrollState = rememberScrollState()
 
-    val posterAspectRatio = remember(template.width, template.height) {
-        template.width.toFloat() / template.height.toFloat()
+    // Use intrinsicHeight for calculating aspect ratio to support dynamic content
+    val posterAspectRatio = remember(template.width, template.intrinsicHeight) {
+        template.width / template.intrinsicHeight
     }
 
     var themeToDelete by remember { mutableStateOf<PosterTheme?>(null) }
