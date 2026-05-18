@@ -1,5 +1,6 @@
 import SwiftUI
 import Firebase
+import GoogleMobileAds
 import ComposeApp
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -7,8 +8,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         MainViewControllerKt.initializeKoin()
-        // 2. Initialize Google Mobile Ads
+        
+        // Correct way to initialize Google Mobile Ads in Swift
         GADMobileAds.sharedInstance().start(completionHandler: nil)
+
         return true
     }
 }
