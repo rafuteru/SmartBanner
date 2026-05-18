@@ -3,22 +3,9 @@ package lab.smartbanner
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.network.ktor3.KtorNetworkFetcherFactory
-import platform.UIKit.UIDevice
-import platform.UIKit.UIApplication
-import platform.UIKit.UIAlertController
-import platform.UIKit.UIAlertAction
-import platform.UIKit.UIAlertControllerStyleActionSheet
-import platform.UIKit.UIAlertActionStyleDefault
-import platform.UIKit.UIAlertActionStyleCancel
-import platform.UIKit.UIWindow
-import platform.Foundation.NSURL
-import platform.Foundation.NSCharacterSet
-import platform.Foundation.URLQueryAllowedCharacterSet
-import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
-import platform.Foundation.NSString
-import platform.Foundation.create
+import platform.UIKit.*
+import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.UIKit.popoverPresentationController
 import kotlin.experimental.ExperimentalNativeApi
 
 class IOSPlatform: Platform {
@@ -32,29 +19,35 @@ class IOSPlatform: Platform {
 
     @OptIn(ExperimentalForeignApi::class)
     override fun openEmail(recipient: String, subject: String, body: String) {
-        val allowedSet = NSCharacterSet.URLQueryAllowedCharacterSet
-        val encodedRecipient = NSString.create(string = recipient).stringByAddingPercentEncodingWithAllowedCharacters(allowedSet) ?: ""
-        val encodedSubject = NSString.create(string = subject).stringByAddingPercentEncodingWithAllowedCharacters(allowedSet) ?: ""
-        val encodedBody = NSString.create(string = body).stringByAddingPercentEncodingWithAllowedCharacters(allowedSet) ?: ""
-        
-        val apps = listOf(
-            "Mail" to "mailto:$encodedRecipient?subject=$encodedSubject&body=$encodedBody",
-            "Gmail" to "googlegmail:///co?to=$encodedRecipient&subject=$encodedSubject&body=$encodedBody"
-        )
-
-        val availableApps = apps.filter { (_, urlString) ->
-            val url = NSURL.URLWithString(urlString)
-            url != null && UIApplication.sharedApplication.canOpenURL(url)
+        fun String.urlEncode(): String {
+            val allowedSet = NSCharacterSet.alphanumericCharacterSet.mutableCopy() as NSMutableCharacterSet
+            allowedSet.addCharactersInString("-._~")
+            return (this as NSString).stringByAddingPercentEncodingWithAllowedCharacters(allowedSet) ?: this
         }
 
-        if (availableApps.isEmpty()) {
-            val fallbackUrl = "mailto:$encodedRecipient?subject=$encodedSubject&body=$encodedBody"
-            NSURL.URLWithString(fallbackUrl)?.let { UIApplication.sharedApplication.openURL(it) }
+        val encodedRecipient = recipient.urlEncode()
+        val encodedSubject = subject.urlEncode()
+        val encodedBody = body.urlEncode()
+
+        val mailUrl = NSURL.URLWithString("mailto:$encodedRecipient?subject=$encodedSubject&body=$encodedBody")
+        val gmailUrl = NSURL.URLWithString("googlegmail:///co?to=$encodedRecipient&subject=$encodedSubject&body=$encodedBody")
+
+        val apps = mutableListOf<Pair<String, NSURL>>()
+        
+        if (mailUrl != null && UIApplication.sharedApplication.canOpenURL(mailUrl)) {
+            apps.add("Mail" to mailUrl)
+        }
+        if (gmailUrl != null && UIApplication.sharedApplication.canOpenURL(gmailUrl)) {
+            apps.add("Gmail" to gmailUrl)
+        }
+
+        if (apps.isEmpty()) {
+            mailUrl?.let { UIApplication.sharedApplication.openURL(it, emptyMap<Any?, Any?>(), null) }
             return
         }
 
-        if (availableApps.size == 1) {
-            NSURL.URLWithString(availableApps[0].second)?.let { UIApplication.sharedApplication.openURL(it) }
+        if (apps.size == 1) {
+            UIApplication.sharedApplication.openURL(apps[0].second, emptyMap<Any?, Any?>(), null)
             return
         }
 
@@ -64,13 +57,13 @@ class IOSPlatform: Platform {
             preferredStyle = UIAlertControllerStyleActionSheet
         )
 
-        availableApps.forEach { (name, urlString) ->
+        apps.forEach { (name, url) ->
             alert.addAction(
                 UIAlertAction.actionWithTitle(
                     title = name,
                     style = UIAlertActionStyleDefault,
                     handler = { _ ->
-                        NSURL.URLWithString(urlString)?.let { UIApplication.sharedApplication.openURL(it) }
+                        UIApplication.sharedApplication.openURL(url, emptyMap<Any?, Any?>(), null)
                     }
                 )
             )
@@ -84,7 +77,6 @@ class IOSPlatform: Platform {
             )
         )
 
-        // Find the active window and root view controller more reliably
         val window = UIApplication.sharedApplication.windows
             .mapNotNull { it as? UIWindow }
             .firstOrNull { it.isKeyWindow() }
@@ -97,11 +89,9 @@ class IOSPlatform: Platform {
                 popover.sourceView = rootVC.view
                 popover.sourceRect = rootVC.view.bounds
             }
-            
             rootVC.presentViewController(alert, animated = true, completion = null)
         } else {
-            // Fallback if we can't find a view controller to present from
-            NSURL.URLWithString(availableApps[0].second)?.let { UIApplication.sharedApplication.openURL(it) }
+            UIApplication.sharedApplication.openURL(apps[0].second, emptyMap<Any?, Any?>(), null)
         }
     }
 
