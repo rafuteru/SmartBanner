@@ -16,12 +16,32 @@ data class PosterTemplate(
     val themes: List<PosterTheme> = emptyList(),
     val config: TemplateConfig = TemplateConfig()
     ) {
+
+    /**
+     * Elements with their absolute coordinates resolved based on the 'below' property.
+     */
+    val resolvedElements: List<ElementConfig>
+        get() {
+            val resolved = mutableMapOf<String, ElementConfig>()
+            return elements.map { element ->
+                val finalElement = if (element.below == null) {
+                    element
+                } else {
+                    val anchor = resolved[element.below]
+                    val absoluteY = (anchor?.y ?: 0f) + (anchor?.height ?: 0f) + element.y
+                    element.withY(absoluteY)
+                }
+                resolved[element.id] = finalElement
+                finalElement
+            }
+        }
+
     /**
      * Calculates the height required to fit all elements, 
      * ensuring it's at least the base [height].
      */
     val intrinsicHeight: Float
-        get() = elements.maxOfOrNull { it.y + it.height }?.let { maxOf(it, height) } ?: height
+        get() = resolvedElements.maxOfOrNull { it.y + it.height }?.let { maxOf(it, height) } ?: height
 }
 
 @Serializable
@@ -52,6 +72,13 @@ sealed class ElementConfig {
     abstract val width: Float
     abstract val height: Float
     abstract val zIndex: Int
+    abstract val below: String?
+
+    fun withY(newY: Float): ElementConfig = when (this) {
+        is TextElement -> copy(y = newY)
+        is ImageElement -> copy(y = newY)
+        is BannerElement -> copy(y = newY)
+    }
 }
 
 @Serializable
@@ -63,6 +90,7 @@ data class TextElement(
     override val width: Float,
     override val height: Float,
     override val zIndex: Int = 0,
+    override val below: String? = null,
     val text: String,
     val fontSize: Float = 24f,
     val color: String = "#000000",
@@ -93,6 +121,7 @@ data class ImageElement(
     override val width: Float,
     override val height: Float,
     override val zIndex: Int = 0,
+    override val below: String? = null,
     val imageUrl: String,
     val cornerRadius: Float = 0f,
     val borderWidth: Float = 0f,
@@ -110,6 +139,7 @@ data class BannerElement(
     override val width: Float,
     override val height: Float,
     override val zIndex: Int = 0,
+    override val below: String? = null,
     val color: String = "#000000",
     val cornerRadius: Float = 0f,
     val alpha: Float = 1.0f,

@@ -55,35 +55,40 @@
     {
       "type": "text",
       "id": "main_wish", "contentKey": "wish_text",
-      "x": 0.0, "y": 350.0, "width": 1080.0, "height": 200.0, "zIndex": 3,
+      "below": "top_pattern",
+      "x": 0.0, "y": 150.0, "width": 1080.0, "height": 200.0, "zIndex": 3,
       "text": "शुभ दीपावली", "fontSize": 140.0, "color": "#FFD700", "colorKey": "primary", "fontWeight": "BOLD", "textAlign": "CENTER",
       "priority": 10
     },
     {
       "type": "text",
       "id": "sub_wish", "contentKey": "sub_wish",
-      "x": 0.0, "y": 530.0, "width": 1080.0, "height": 80.0, "zIndex": 3,
+      "below": "main_wish",
+      "x": 0.0, "y": -20.0, "width": 1080.0, "height": 80.0, "zIndex": 3,
       "text": "HAPPY DIWALI", "fontSize": 50.0, "color": "#E5B8F4", "colorKey": "secondary", "letterSpacing": 10.0, "textAlign": "CENTER",
       "priority": 5
     },
     {
       "type": "image",
       "id": "main_illustration", "contentKey": "hero_image",
-      "x": 140.0, "y": 650.0, "width": 800.0, "height": 450.0, "zIndex": 2,
+      "below": "sub_wish",
+      "x": 140.0, "y": 40.0, "width": 800.0, "height": 450.0, "zIndex": 2,
       "imageUrl": "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&get=80",
       "cornerRadius": 20.0
     },
     {
       "type": "text",
       "id": "message", "contentKey": "message",
-      "x": 100.0, "y": 1120.0, "width": 880.0, "height": 100.0, "zIndex": 3,
+      "below": "main_illustration",
+      "x": 100.0, "y": 20.0, "width": 880.0, "height": 100.0, "zIndex": 3,
       "text": "May this festival of lights bring peace, prosperity, and happiness to your life.", "fontSize": 32.0, "color": "#FFFFFF", "textAlign": "CENTER",
       "priority": 8
     },
     {
       "type": "text",
       "id": "sender", "contentKey": "sender_name",
-      "x": 0.0, "y": 1240.0, "width": 1080.0, "height": 60.0, "zIndex": 3,
+      "below": "message",
+      "x": 0.0, "y": 20.0, "width": 1080.0, "height": 60.0, "zIndex": 3,
       "text": "With Love: Rahul & Family", "fontSize": 36.0, "color": "#FFD700", "colorKey": "primary", "fontWeight": "BOLD", "textAlign": "CENTER",
       "priority": 9
     }

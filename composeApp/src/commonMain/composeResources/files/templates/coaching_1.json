@@ -45,61 +45,70 @@
     {
       "type": "text",
       "id": "academy_name", "contentKey": "academy_name",
-      "x": 60.0, "y": 60.0, "width": 960.0, "height": 80.0, "zIndex": 2,
+      "below": "header_slant",
+      "x": 60.0, "y": -240.0, "width": 960.0, "height": 80.0, "zIndex": 2,
       "text": "EXCELLENCE COACHING CENTRE", "fontSize": 50.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "START",
       "priority": 10
     },
     {
       "type": "text",
       "id": "tagline", "contentKey": "tagline",
-      "x": 60.0, "y": 140.0, "width": 960.0, "height": 40.0, "zIndex": 2,
+      "below": "academy_name",
+      "x": 60.0, "y": 0.0, "width": 960.0, "height": 40.0, "zIndex": 2,
       "text": "Building Foundations for a Brighter Future", "fontSize": 24.0, "color": "#C5CAE9", "colorKey": "secondary", "textAlign": "START",
       "priority": 4
     },
     {
       "type": "banner",
       "id": "admission_badge",
-      "x": 700.0, "y": 250.0, "width": 320.0, "height": 100.0, "zIndex": 3,
+      "below": "header_slant",
+      "x": 700.0, "y": -50.0, "width": 320.0, "height": 100.0, "zIndex": 3,
       "color": "#FFD600", "colorKey": "accent", "cornerRadius": 50.0
     },
     {
       "type": "text",
       "id": "admission_text", "contentKey": "status",
-      "x": 700.0, "y": 280.0, "width": 320.0, "height": 40.0, "zIndex": 4,
+      "below": "admission_badge",
+      "x": 700.0, "y": -70.0, "width": 320.0, "height": 40.0, "zIndex": 4,
       "text": "ADMISSIONS OPEN", "fontSize": 28.0, "color": "#000000", "colorKey": "on_accent", "fontWeight": "BLACK", "textAlign": "CENTER",
       "priority": 8
     },
     {
       "type": "image",
       "id": "student_img", "contentKey": "hero_image",
-      "x": 60.0, "y": 380.0, "width": 960.0, "height": 500.0, "zIndex": 1,
+      "below": "header_slant",
+      "x": 60.0, "y": 80.0, "width": 960.0, "height": 500.0, "zIndex": 1,
       "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80",
       "cornerRadius": 20.0
     },
     {
       "type": "text",
       "id": "main_heading", "contentKey": "heading",
-      "x": 60.0, "y": 920.0, "width": 960.0, "height": 80.0, "zIndex": 2,
+      "below": "student_img",
+      "x": 60.0, "y": 40.0, "width": 960.0, "height": 80.0, "zIndex": 2,
       "text": "Target NEET & JEE 2025", "fontSize": 65.0, "color": "#1A237E", "colorKey": "primary", "fontWeight": "BLACK", "textAlign": "CENTER",
       "priority": 9
     },
     {
       "type": "text",
       "id": "features", "contentKey": "features",
-      "x": 100.0, "y": 1020.0, "width": 880.0, "height": 120.0, "zIndex": 2,
+      "below": "main_heading",
+      "x": 100.0, "y": 20.0, "width": 880.0, "height": 120.0, "zIndex": 2,
       "text": "• Expert Faculty  • Personal Mentorship\n• Mock Tests  • Comprehensive Study Material", "fontSize": 32.0, "color": "#455A64", "textAlign": "CENTER",
       "priority": 5
     },
     {
       "type": "banner",
       "id": "footer",
-      "x": 0.0, "y": 1180.0, "width": 1080.0, "height": 170.0, "zIndex": 1,
+      "below": "features",
+      "x": 0.0, "y": 40.0, "width": 1080.0, "height": 170.0, "zIndex": 1,
       "color": "#1A237E", "colorKey": "primary"
     },
     {
       "type": "text",
       "id": "address", "contentKey": "address",
-      "x": 60.0, "y": 1210.0, "width": 960.0, "height": 100.0, "zIndex": 2,
+      "below": "footer",
+      "x": 60.0, "y": -140.0, "width": 960.0, "height": 100.0, "zIndex": 2,
       "text": "123 Education Hub, Knowledge Park, City\nContact: 1800-123-4567 | www.excellence.com", "fontSize": 30.0, "color": "#FFFFFF", "fontWeight": "BOLD", "textAlign": "CENTER",
       "priority": 7
     }

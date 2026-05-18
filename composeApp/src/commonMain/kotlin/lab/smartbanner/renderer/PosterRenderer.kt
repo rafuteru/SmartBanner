@@ -35,7 +35,8 @@ fun PosterRenderer(
         template = renderingTemplate,
         modifier = modifier
     ) { scale ->
-        renderingTemplate.elements.sortedBy { it.zIndex }.forEach { element ->
+        // Use resolvedElements instead of elements to handle relative positioning
+        renderingTemplate.resolvedElements.sortedBy { it.zIndex }.forEach { element ->
             when (element) {
                 is TextElement -> {
                     val displayText = element.contentKey?.let { key ->
