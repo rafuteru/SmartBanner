@@ -23,8 +23,8 @@ class LocalTemplateRepository(
         "files/templates/clothing_1.json",
         "files/templates/grocery_1.json",
         "files/templates/coaching_1.json",
-        "files/templates/testing.json",
-        "files/templates/premium_testing.json",
+//        "files/templates/testing.json",
+//        "files/templates/premium_testing.json",
     )
 
     @OptIn(ExperimentalResourceApi::class)
