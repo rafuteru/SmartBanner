@@ -84,11 +84,12 @@ class TemplatePreviewViewModel(
 
     fun applyTheme(theme: PosterTheme) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success) {
             val updatedContent = currentState.content.copy(
                 colorMap = theme.colors
             )
             _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
+            // Even if locked, we can save the theme selection as a temporary draft/preference
             saveContent(updatedContent, currentState.template.id)
         }
     }

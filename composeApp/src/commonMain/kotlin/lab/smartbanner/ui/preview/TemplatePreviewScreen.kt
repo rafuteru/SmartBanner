@@ -271,6 +271,64 @@ private fun PreviewContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Theme Selection - Always show if themes are available, even if locked
+        if (template.themes.isNotEmpty() || (!isLocked && content.userThemes.isNotEmpty())) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Themes",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                if (!isLocked) {
+                    TextButton(onClick = { onCreateTheme(templateId) }) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Add Theme")
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                // Predefined Themes (Not editable)
+                items(template.themes) { theme ->
+                    val isSelected = state.selectedThemeId == theme.id
+                    ThemeItem(
+                        name = theme.name,
+                        swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                        isSelected = isSelected,
+                        onClick = { viewModel.applyTheme(theme) }
+                    )
+                }
+                
+                // User Custom Themes (Editable & Deletable) - Only if not locked
+                if (!isLocked) {
+                    items(content.userThemes) { theme ->
+                        val isSelected = state.selectedThemeId == theme.id
+                        ThemeItem(
+                            name = theme.name,
+                            swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                            isSelected = isSelected,
+                            onClick = { viewModel.applyTheme(theme) },
+                            onEdit = { onEditTheme(theme.id, templateId) },
+                            onDelete = { themeToDelete = theme }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
         if (isLocked) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -312,57 +370,6 @@ private fun PreviewContent(
                         Spacer(Modifier.width(8.dp))
                         Text("Contact Support to Unlock")
                     }
-                }
-            }
-        } else {
-            // Theme Selection
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Themes",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                TextButton(onClick = { onCreateTheme(templateId) }) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Add Theme")
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                // Predefined Themes (Not editable)
-                items(template.themes) { theme ->
-                    val isSelected = state.selectedThemeId == theme.id
-                    ThemeItem(
-                        name = theme.name,
-                        swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
-                        isSelected = isSelected,
-                        onClick = { viewModel.applyTheme(theme) }
-                    )
-                }
-                
-                // User Custom Themes (Editable & Deletable)
-                items(content.userThemes) { theme ->
-                    val isSelected = state.selectedThemeId == theme.id
-                    ThemeItem(
-                        name = theme.name,
-                        swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
-                        isSelected = isSelected,
-                        onClick = { viewModel.applyTheme(theme) },
-                        onEdit = { onEditTheme(theme.id, templateId) },
-                        onDelete = { themeToDelete = theme }
-                    )
                 }
             }
         }
