@@ -16,8 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
@@ -57,6 +59,8 @@ fun TemplatePreviewScreen(
         }
     }
 
+    val isLocked = (uiState as? PreviewUiState.Success)?.isLocked ?: false
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -76,28 +80,30 @@ fun TemplatePreviewScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showResetDialog = true }) {
-                        Icon(Icons.Default.RestartAlt, contentDescription = "Reset to Default")
-                    }
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                try {
-                                    val bitmap = graphicsLayer.toImageBitmap()
-                                    viewModel.exportPoster(bitmap)
-                                } catch (e: Exception) {
-                                    snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                    if (!isLocked) {
+                        IconButton(onClick = { showResetDialog = true }) {
+                            Icon(Icons.Default.RestartAlt, contentDescription = "Reset to Default")
+                        }
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    try {
+                                        val bitmap = graphicsLayer.toImageBitmap()
+                                        viewModel.exportPoster(bitmap)
+                                    } catch (e: Exception) {
+                                        snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                    }
                                 }
                             }
+                        ) {
+                            Icon(Icons.Default.Download, contentDescription = "Export")
                         }
-                    ) {
-                        Icon(Icons.Default.Download, contentDescription = "Export")
                     }
                 }
             )
         },
         bottomBar = {
-            if (uiState is PreviewUiState.Success) {
+            if (uiState is PreviewUiState.Success && !isLocked) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 8.dp,
@@ -183,6 +189,7 @@ private fun PreviewContent(
 ) {
     val template = state.template
     val content = state.content
+    val isLocked = state.isLocked
     val scrollState = rememberScrollState()
 
     val posterAspectRatio = remember(template.width, template.height) {
@@ -206,69 +213,157 @@ private fun PreviewContent(
                 .shadow(8.dp)
                 .background(Color.White)
                 .drawWithContent {
-                    graphicsLayer.record {
-                        this@drawWithContent.drawContent()
+                    if (!isLocked) {
+                        graphicsLayer.record {
+                            this@drawWithContent.drawContent()
+                        }
                     }
                     drawContent()
-                }
+                },
+            contentAlignment = Alignment.Center
         ) {
             PosterRenderer(
                 template = template,
                 content = content,
                 modifier = Modifier.fillMaxSize()
             )
+
+            if (isLocked) {
+                // Watermark Overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.05f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        repeat(5) {
+                            Text(
+                                text = "PREMIUM TEMPLATE",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = Color.Gray.copy(alpha = 0.2f),
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier
+                                    .rotate(-45f)
+                                    .padding(vertical = 40.dp)
+                            )
+                        }
+                    }
+                    
+                    // Locked Badge
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.7f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(80.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Theme Selection
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "Themes",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            
-            TextButton(onClick = { onCreateTheme(templateId) }) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(4.dp))
-                Text("Add Theme")
+        if (isLocked) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.WorkspacePremium,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Premium Template",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "This template is exclusive to our registered customers. Contact support to unlock this and many other premium designs.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = { viewModel.contactSupportForLockedTemplate(template.name) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.SupportAgent, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Contact Support to Unlock")
+                    }
+                }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(12.dp))
+        } else {
+            // Theme Selection
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Themes",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                TextButton(onClick = { onCreateTheme(templateId) }) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Add Theme")
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
 
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            // Predefined Themes (Not editable)
-            items(template.themes) { theme ->
-                val isSelected = state.selectedThemeId == theme.id
-                ThemeItem(
-                    name = theme.name,
-                    swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
-                    isSelected = isSelected,
-                    onClick = { viewModel.applyTheme(theme) }
-                )
-            }
-            
-            // User Custom Themes (Editable & Deletable)
-            items(content.userThemes) { theme ->
-                val isSelected = state.selectedThemeId == theme.id
-                ThemeItem(
-                    name = theme.name,
-                    swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
-                    isSelected = isSelected,
-                    onClick = { viewModel.applyTheme(theme) },
-                    onEdit = { onEditTheme(theme.id, templateId) },
-                    onDelete = { themeToDelete = theme }
-                )
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                // Predefined Themes (Not editable)
+                items(template.themes) { theme ->
+                    val isSelected = state.selectedThemeId == theme.id
+                    ThemeItem(
+                        name = theme.name,
+                        swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                        isSelected = isSelected,
+                        onClick = { viewModel.applyTheme(theme) }
+                    )
+                }
+                
+                // User Custom Themes (Editable & Deletable)
+                items(content.userThemes) { theme ->
+                    val isSelected = state.selectedThemeId == theme.id
+                    ThemeItem(
+                        name = theme.name,
+                        swatchColor = theme.colors["background"] ?: theme.colors["primary"] ?: "#000000",
+                        isSelected = isSelected,
+                        onClick = { viewModel.applyTheme(theme) },
+                        onEdit = { onEditTheme(theme.id, templateId) },
+                        onDelete = { themeToDelete = theme }
+                    )
+                }
             }
         }
         

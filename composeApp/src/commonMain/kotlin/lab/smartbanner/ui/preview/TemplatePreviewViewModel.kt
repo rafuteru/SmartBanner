@@ -4,10 +4,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.DraftRepository
 import lab.smartbanner.domain.PosterDraft
 import lab.smartbanner.domain.TemplateRepository
@@ -15,13 +15,15 @@ import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
 import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.utils.PosterExporter
+import lab.smartbanner.utils.contactSupport
 
 sealed class PreviewUiState {
     object Loading : PreviewUiState()
     data class Success(
         val template: PosterTemplate,
         val content: PosterContent,
-        val selectedThemeId: String? = null
+        val selectedThemeId: String? = null,
+        val isLocked: Boolean = false
     ) : PreviewUiState()
     data class Error(val message: String) : PreviewUiState()
 }
@@ -29,7 +31,7 @@ sealed class PreviewUiState {
 class TemplatePreviewViewModel(
     private val repository: TemplateRepository,
     private val draftRepository: DraftRepository,
-    private val posterExporter: PosterExporter
+    private val posterExporter: PosterExporter,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PreviewUiState>(PreviewUiState.Loading)
@@ -38,7 +40,6 @@ class TemplatePreviewViewModel(
     private val _exportResult = MutableSharedFlow<Result<Unit>>()
     val exportResult = _exportResult.asSharedFlow()
 
-    private var saveJob: Job? = null
     private var originalContent: PosterContent? = null
 
     fun loadTemplate(id: String, initialContent: PosterContent? = null) {
@@ -54,6 +55,8 @@ class TemplatePreviewViewModel(
             try {
                 val template = repository.getTemplateById(id)
                 if (template != null) {
+                    val isLocked = template.config.isLocked
+                    
                     val content = initialContent ?: run {
                         val draft = draftRepository.getLatestDraft().first()
                         if (draft?.templateId == id) {
@@ -69,7 +72,7 @@ class TemplatePreviewViewModel(
                         theme.colors == content.colorMap
                     }?.id
                     
-                    _uiState.value = PreviewUiState.Success(template, content, selectedThemeId)
+                    _uiState.value = PreviewUiState.Success(template, content, selectedThemeId, isLocked)
                 } else {
                     _uiState.value = PreviewUiState.Error("Template not found")
                 }
@@ -81,7 +84,7 @@ class TemplatePreviewViewModel(
 
     fun applyTheme(theme: PosterTheme) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             val updatedContent = currentState.content.copy(
                 colorMap = theme.colors
             )
@@ -92,7 +95,7 @@ class TemplatePreviewViewModel(
 
     fun updateContent(content: PosterContent) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             _uiState.value = currentState.copy(content = content)
             saveContent(content, currentState.template.id)
         }
@@ -108,7 +111,7 @@ class TemplatePreviewViewModel(
 
     fun resetToDefault() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             val emptyContent = PosterContent()
             _uiState.value = currentState.copy(content = emptyContent, selectedThemeId = null)
             viewModelScope.launch {
@@ -120,7 +123,7 @@ class TemplatePreviewViewModel(
 
     fun addUserTheme(theme: PosterTheme) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             val updatedUserThemes = currentState.content.userThemes.toMutableList()
             val existingIndex = updatedUserThemes.indexOfFirst { it.id == theme.id }
             if (existingIndex != -1) {
@@ -140,7 +143,7 @@ class TemplatePreviewViewModel(
 
     fun deleteUserTheme(themeId: String) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             val updatedUserThemes = currentState.content.userThemes.filter { it.id != themeId }
             val updatedContent = currentState.content.copy(userThemes = updatedUserThemes)
             
@@ -154,7 +157,7 @@ class TemplatePreviewViewModel(
 
     suspend fun saveCurrentDraft() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             if (currentState.content != originalContent) {
                 val draft = PosterDraft(currentState.template.id, currentState.content)
                 draftRepository.saveDraft(draft)
@@ -165,7 +168,7 @@ class TemplatePreviewViewModel(
 
     suspend fun completeEditing() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
             draftRepository.clearActiveDraft()
         }
@@ -173,7 +176,7 @@ class TemplatePreviewViewModel(
 
     fun exportPoster(bitmap: ImageBitmap) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success) {
+        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
             viewModelScope.launch {
                 val timestamp = Clock.System.now().toEpochMilliseconds()
                 val fileName = "SmartBanner_${currentState.template.id}_$timestamp"
@@ -181,5 +184,12 @@ class TemplatePreviewViewModel(
                 _exportResult.emit(result)
             }
         }
+    }
+
+    fun contactSupportForLockedTemplate(templateName: String) {
+        contactSupport(
+            subject = "Access Request: $templateName",
+            body = "Hi, I would like to get access to the '$templateName' template. Please let me know the process."
+        )
     }
 }

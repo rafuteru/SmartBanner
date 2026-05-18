@@ -30,10 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import lab.smartbanner.getPlatform
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
 import lab.smartbanner.renderer.PosterRenderer
+import lab.smartbanner.utils.contactSupport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,11 +93,9 @@ fun HomeScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    val codeToSend = if (viewModel.currentIdentifier.isBlank()) "NA" else viewModel.currentIdentifier
-                    getPlatform().openEmail(
-                        recipient = "coffeeat202labs@gmail.com",
+                    contactSupport(
                         subject = "Custom Design Request",
-                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: $codeToSend\n\n[Send your design we will add a theme for you.]"
+                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: ${viewModel.currentIdentifier}\n\n[Send your design we will add a theme for you.]"
                     )
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -149,8 +147,7 @@ fun HomeScreen(
                     
                     Button(
                         onClick = { 
-                            val codeToCopy = if (viewModel.currentIdentifier.isBlank()) "NA" else viewModel.currentIdentifier
-                            clipboardManager.setText(AnnotatedString(codeToCopy))
+                            clipboardManager.setText(AnnotatedString(viewModel.currentIdentifier))
                             showIdDialog = false
                         },
                         modifier = Modifier.fillMaxWidth(),

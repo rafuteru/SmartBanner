@@ -4,6 +4,9 @@
   "category": "Jewellery",
   "width": 1080.0,
   "height": 1350.0,
+  "config": {
+    "isLocked": false
+  },
   "background": {
     "color": "#0A0A0A",
     "colorKey": "background"

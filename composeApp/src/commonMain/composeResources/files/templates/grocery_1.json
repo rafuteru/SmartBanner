@@ -4,6 +4,9 @@
   "category": "Grocery",
   "width": 1080.0,
   "height": 1350.0,
+  "config": {
+    "isLocked": false
+  },
   "background": {
     "color": "#F1F8E9",
     "colorKey": "background"

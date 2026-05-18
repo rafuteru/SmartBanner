@@ -13,7 +13,13 @@ data class PosterTemplate(
     val height: Float = 1350f,
     val background: BackgroundConfig = BackgroundConfig(),
     val elements: List<ElementConfig> = emptyList(),
-    val themes: List<PosterTheme> = emptyList()
+    val themes: List<PosterTheme> = emptyList(),
+    val config: TemplateConfig = TemplateConfig()
+)
+
+@Serializable
+data class TemplateConfig(
+    val isLocked: Boolean = true
 )
 
 @Serializable
