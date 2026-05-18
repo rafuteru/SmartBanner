@@ -5,8 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.PosterTemplate
 import lab.smartbanner.renderer.PosterRenderer
+import lab.smartbanner.ui.components.AdBanner
+import lab.smartbanner.utils.AdConstants
 import lab.smartbanner.utils.contactSupport
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -278,16 +281,49 @@ private fun HomeContent(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(
-                    items = filteredTemplates,
-                    key = { it.id }
-                ) { template ->
-                    TemplateItem(
-                        template = template,
-                        onClick = { onTemplateClick(template) }
-                    )
+                // Correctly inject ads into the grid
+                filteredTemplates.forEachIndexed { index, template ->
+                    if (index > 0 && index % 4 == 0) {
+                        item(span = { GridItemSpan(2) }) {
+                            AdItemContent()
+                        }
+                    }
+                    
+                    item {
+                        TemplateItem(
+                            template = template,
+                            onClick = { onTemplateClick(template) }
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AdItemContent() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "ADVERTISEMENT",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            AdBanner(
+                modifier = Modifier.fillMaxWidth(),
+                adUnitId = AdConstants.HOME_GRID_BANNER_ID
+            )
         }
     }
 }

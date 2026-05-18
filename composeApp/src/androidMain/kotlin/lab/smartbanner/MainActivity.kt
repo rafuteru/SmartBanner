@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import org.koin.android.ext.android.inject
+import com.google.android.gms.ads.MobileAds
 
 class MainActivity : ComponentActivity() {
 
@@ -15,6 +15,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         initializePlatform(this)
+        
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this) {}
 
         setContent {
             App()

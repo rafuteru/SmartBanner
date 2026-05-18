@@ -34,6 +34,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.coil.network.okhttp)
+            implementation(libs.play.services.ads)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

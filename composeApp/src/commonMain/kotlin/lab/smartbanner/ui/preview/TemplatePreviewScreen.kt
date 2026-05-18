@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.renderer.PosterRenderer
 import lab.smartbanner.ui.theme.SimpleColorPicker
+import lab.smartbanner.ui.components.AdBanner
+import lab.smartbanner.utils.AdConstants
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -270,7 +272,11 @@ private fun PreviewContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-
+        // Use the SECOND Ad Unit ID here
+        AdBanner(
+            modifier = Modifier.fillMaxWidth(),
+            adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
+        )
         // Theme Selection - Always show if themes are available, even if locked
         if (template.themes.isNotEmpty() || (!isLocked && content.userThemes.isNotEmpty())) {
             Row(
@@ -373,7 +379,7 @@ private fun PreviewContent(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(60.dp))
     }
 
