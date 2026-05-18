@@ -7,6 +7,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         MainViewControllerKt.initializeKoin()
+        // 2. Initialize Google Mobile Ads
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
         return true
     }
 }

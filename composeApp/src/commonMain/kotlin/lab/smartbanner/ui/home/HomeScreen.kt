@@ -303,29 +303,10 @@ private fun HomeContent(
 
 @Composable
 private fun AdItemContent() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "ADVERTISEMENT",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            AdBanner(
-                modifier = Modifier.fillMaxWidth(),
-                adUnitId = AdConstants.HOME_GRID_BANNER_ID
-            )
-        }
-    }
+    AdBanner(
+        modifier = Modifier.fillMaxWidth(),
+        adUnitId = AdConstants.HOME_GRID_BANNER_ID
+    )
 }
 
 @Composable
