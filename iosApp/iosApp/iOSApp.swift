@@ -9,8 +9,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         MainViewControllerKt.initializeKoin()
         
-        // Correct way to initialize Google Mobile Ads in Swift
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        MobileAds.shared.start()
 
         return true
     }
