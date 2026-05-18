@@ -134,8 +134,9 @@ fun CreateThemeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // 1. Poster Preview
+                // FIX: Use toFloat() to avoid integer division resulting in 0
                 val posterAspectRatio = remember(template.width, template.height) {
-                    template.width / template.height
+                    template.width.toFloat() / template.height.toFloat()
                 }
                 
                 Card(
@@ -219,6 +220,7 @@ fun CreateThemeScreen(
                     text = { Text("Are you sure you want to delete this custom theme?") },
                     confirmButton = {
                         TextButton(onClick = {
+                            showDeleteDialog = false
                             viewModel.deleteUserTheme(editThemeId)
                             onBack()
                         }) {

@@ -160,8 +160,8 @@ fun TemplatePreviewScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.resetToDefault()
                             showResetDialog = false
+                            viewModel.resetToDefault()
                         }
                     ) {
                         Text("Reset")
@@ -378,16 +378,17 @@ private fun PreviewContent(
     }
 
     // Delete Confirmation Dialog
-    if (themeToDelete != null) {
+    themeToDelete?.let { theme ->
         AlertDialog(
             onDismissRequest = { themeToDelete = null },
             title = { Text("Delete Theme") },
-            text = { Text("Are you sure you want to delete '${themeToDelete!!.name}'?") },
+            text = { Text("Are you sure you want to delete \u0027${theme.name}\u0027?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deleteUserTheme(themeToDelete!!.id)
+                        val idToDelete = theme.id
                         themeToDelete = null
+                        viewModel.deleteUserTheme(idToDelete)
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {

@@ -108,7 +108,7 @@ fun EditFieldsScreen(
                                 modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
                             )
                             imageElements.forEach { element ->
-                                val key = element.contentKey!!
+                                val key = element.contentKey ?: return@forEach
                                 val currentValue = localContent.imageMap[key] ?: element.imageUrl
                                 
                                 OutlinedTextField(
@@ -159,7 +159,7 @@ fun EditFieldsScreen(
                         )
                         
                         textElements.forEach { element ->
-                            val key = element.contentKey!!
+                            val key = element.contentKey ?: return@forEach
                             val value = localContent.textMap[key] ?: element.text
                             
                             EditTextFieldItem(

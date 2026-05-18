@@ -145,21 +145,6 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    Button(
-                        onClick = { 
-                            clipboardManager.setText(AnnotatedString(viewModel.currentIdentifier))
-                            showIdDialog = false
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Copy Access Code")
-                    }
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
                     if (viewModel.currentIdentifier.isNotBlank()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -188,7 +173,26 @@ fun HomeScreen(
                     }
                 }
             },
-            confirmButton = {}
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        val code = viewModel.currentIdentifier
+                        showIdDialog = false
+                        clipboardManager.setText(AnnotatedString(code))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Copy Access Code")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showIdDialog = false }) {
+                    Text("Close")
+                }
+            }
         )
     }
 }
