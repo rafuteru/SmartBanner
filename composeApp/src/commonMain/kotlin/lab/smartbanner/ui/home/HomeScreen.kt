@@ -142,7 +142,7 @@ fun HomeScreen(
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Tap below to copy your Access Code. Share it with our team for custom design requests.",
+                        "Please save your ID for future use. Tap below to copy your Access Code. Share it with our team for custom design requests.",
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))

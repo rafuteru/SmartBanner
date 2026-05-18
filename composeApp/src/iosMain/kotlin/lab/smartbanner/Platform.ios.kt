@@ -6,6 +6,13 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import platform.UIKit.UIDevice
 import platform.UIKit.UIApplication
 import platform.Foundation.NSURL
+import platform.Foundation.NSURLComponents
+import platform.Foundation.NSURLQueryItem
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
+import platform.Foundation.NSCharacterSet
+import platform.Foundation.URLQueryAllowedCharacterSet
 import kotlin.experimental.ExperimentalNativeApi
 
 class IOSPlatform: Platform {
@@ -14,11 +21,27 @@ class IOSPlatform: Platform {
     @OptIn(ExperimentalNativeApi::class)
     override val isDebug: Boolean = kotlin.native.Platform.isDebugBinary
 
+    override val deviceId: String
+        get() = UIDevice.currentDevice.identifierForVendor?.UUIDString ?: "unknown_ios"
+
     override fun openEmail(recipient: String, subject: String, body: String) {
-        val urlString = "mailto:$recipient?subject=${subject.replace(" ", "%20")}&body=${body.replace(" ", "%20")}"
-        val url = NSURL.URLWithString(urlString)
-        if (url != null && UIApplication.sharedApplication.canOpenURL(url)) {
-            UIApplication.sharedApplication.openURL(url)
+        val components = NSURLComponents().apply {
+            scheme = "mailto"
+            path = recipient
+            queryItems = listOf(
+                NSURLQueryItem(name = "subject", value = subject),
+                NSURLQueryItem(name = "body", value = body)
+            )
+        }
+        
+        val url = components.URL
+        if (url != null) {
+            if (UIApplication.sharedApplication.canOpenURL(url)) {
+                UIApplication.sharedApplication.openURL(url)
+            } else {
+                // Fallback or log if mailto can't be opened
+                println("Cannot open mailto URL: $url")
+            }
         }
     }
 

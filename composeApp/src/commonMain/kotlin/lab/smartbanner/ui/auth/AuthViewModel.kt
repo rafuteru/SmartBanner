@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.AuthState
 import lab.smartbanner.domain.ConfigRepository
+import lab.smartbanner.getPlatform
 
 class AuthViewModel(
     private val authRepository: AccessCodeRepository,
@@ -21,7 +22,12 @@ class AuthViewModel(
     fun signInWithCode(code: String) {
         viewModelScope.launch {
             val trimmedCode = code.trim()
-            authRepository.signInWithCode(trimmedCode)
+            val finalCode = if (trimmedCode.isEmpty()) {
+                getPlatform().deviceId
+            } else {
+                trimmedCode
+            }
+            authRepository.signInWithCode(finalCode)
             // Refresh config immediately after sign in to fetch user-specific templates
             configRepository.refresh()
         }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
@@ -16,6 +17,11 @@ class AndroidPlatform(private val context: Context?) : Platform {
         get() = context?.let {
             (it.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         } ?: false
+
+    override val deviceId: String
+        get() = context?.let {
+            Settings.Secure.getString(it.contentResolver, Settings.Secure.ANDROID_ID)
+        } ?: "unknown_android"
 
     override fun openEmail(recipient: String, subject: String, body: String) {
         context?.let { ctx ->
