@@ -23,9 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.renderer.PosterRenderer
+import lab.smartbanner.ui.components.AdBanner
 import lab.smartbanner.ui.preview.PreviewUiState
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
 import lab.smartbanner.ui.preview.parseColor
+import lab.smartbanner.utils.AdConstants
 import kotlinx.datetime.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,7 +136,6 @@ fun CreateThemeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // 1. Poster Preview
-                // FIX: Use toFloat() to avoid integer division resulting in 0
                 val posterAspectRatio = remember(template.width, template.height) {
                     template.width.toFloat() / template.height.toFloat()
                 }
@@ -165,7 +166,13 @@ fun CreateThemeScreen(
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                // High-visibility Ad placement
+                AdBanner(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     "Theme Colors", 
                     style = MaterialTheme.typography.titleMedium, 

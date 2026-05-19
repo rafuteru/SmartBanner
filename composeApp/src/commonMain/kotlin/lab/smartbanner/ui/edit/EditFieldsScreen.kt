@@ -17,12 +17,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import lab.smartbanner.model.ImageElement
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.TextElement
+import lab.smartbanner.ui.components.AdBanner
 import lab.smartbanner.ui.preview.PreviewUiState
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
+import lab.smartbanner.utils.AdConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +94,12 @@ fun EditFieldsScreen(
                             }
                             .padding(16.dp)
                     ) {
+                        // High-visibility Ad placement at the very top
+                        AdBanner(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
+                        )
+
                         // 1. Image Elements Section
                         val imageElements = template.elements
                             .filterIsInstance<ImageElement>()
@@ -158,8 +165,8 @@ fun EditFieldsScreen(
                             modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
                         )
                         
-                        textElements.forEach { element ->
-                            val key = element.contentKey ?: return@forEach
+                        textElements.forEachIndexed { index, element ->
+                            val key = element.contentKey ?: return@forEachIndexed
                             val value = localContent.textMap[key] ?: element.text
                             
                             EditTextFieldItem(
@@ -171,6 +178,14 @@ fun EditFieldsScreen(
                                     )
                                 }
                             )
+
+                            // Inject another ad after 3 items for high engagement
+                            if (index == 2 && textElements.size > 4) {
+                                AdBanner(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                    adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
+                                )
+                            }
                         }
                         
                         Spacer(modifier = Modifier.height(100.dp))
