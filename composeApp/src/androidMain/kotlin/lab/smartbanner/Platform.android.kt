@@ -11,17 +11,12 @@ import android.provider.Settings
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.appopen.AppOpenAd
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 class AndroidPlatform(private val context: Context?) : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
+    
+    // Delegate ad logic to AndroidAdManager
+    private val adManager: AdManager? = context?.let { AndroidAdManager(it) }
     
     override val isDebug: Boolean
         get() = context?.let {
@@ -68,65 +63,15 @@ class AndroidPlatform(private val context: Context?) : Platform {
     }
 
     override fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit) {
-        val activity = context?.findActivity() ?: return
-        
-        RewardedAd.load(activity, adUnitId, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {}
-
-            override fun onAdLoaded(ad: RewardedAd) {
-                ad.fullScreenContentCallback = object : FullScreenContentCallback() {}
-                ad.show(activity) {
-                    onRewardEarned()
-                }
-            }
-        })
+        adManager?.showRewardedAd(adUnitId, onRewardEarned)
     }
 
     override fun showInterstitialAd(adUnitId: String, onAdClosed: () -> Unit) {
-        val activity = context?.findActivity() ?: run {
-            onAdClosed()
-            return
-        }
-
-        InterstitialAd.load(activity, adUnitId, AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                onAdClosed()
-            }
-
-            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
-                    override fun onAdDismissedFullScreenContent() {
-                        onAdClosed()
-                    }
-
-                    override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
-                        onAdClosed()
-                    }
-                }
-                interstitialAd.show(activity)
-            }
-        })
+        adManager?.showInterstitialAd(adUnitId, onAdClosed) ?: onAdClosed()
     }
 
     override fun showAppOpenAd(adUnitId: String) {
-        val activity = context?.findActivity() ?: return
-        
-        AppOpenAd.load(activity, adUnitId, AdRequest.Builder().build(), AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, object : AppOpenAd.AppOpenAdLoadCallback() {
-            override fun onAdLoaded(ad: AppOpenAd) {
-                ad.show(activity)
-            }
-
-            override fun onAdFailedToLoad(loadAdError: LoadAdError) {}
-        })
-    }
-
-    private fun Context.findActivity(): Activity? {
-        var context = this
-        while (context is ContextWrapper) {
-            if (context is Activity) return context
-            context = context.baseContext
-        }
-        return null
+        adManager?.showAppOpenAd(adUnitId)
     }
 }
 

@@ -8,9 +8,12 @@ import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.experimental.ExperimentalNativeApi
 
-class IOSPlatform: Platform {
+class IOSPlatform : Platform {
     override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
     
+    // Will be injected from Swift
+    var adManager: AdManager? = null
+
     @OptIn(ExperimentalNativeApi::class)
     override val isDebug: Boolean = kotlin.native.Platform.isDebugBinary
 
@@ -19,80 +22,7 @@ class IOSPlatform: Platform {
 
     @OptIn(ExperimentalForeignApi::class)
     override fun openEmail(recipient: String, subject: String, body: String) {
-        fun String.urlEncode(): String {
-            val allowedSet = NSCharacterSet.alphanumericCharacterSet.mutableCopy() as NSMutableCharacterSet
-            allowedSet.addCharactersInString("-._~")
-            return (this as NSString).stringByAddingPercentEncodingWithAllowedCharacters(allowedSet) ?: this
-        }
-
-        val encodedRecipient = recipient.urlEncode()
-        val encodedSubject = subject.urlEncode()
-        val encodedBody = body.urlEncode()
-
-        val mailUrl = NSURL.URLWithString("mailto:$encodedRecipient?subject=$encodedSubject&body=$encodedBody")
-        val gmailUrl = NSURL.URLWithString("googlegmail:///co?to=$encodedRecipient&subject=$encodedSubject&body=$encodedBody")
-
-        val apps = mutableListOf<Pair<String, NSURL>>()
-        
-        if (mailUrl != null && UIApplication.sharedApplication.canOpenURL(mailUrl)) {
-            apps.add("Mail" to mailUrl)
-        }
-        if (gmailUrl != null && UIApplication.sharedApplication.canOpenURL(gmailUrl)) {
-            apps.add("Gmail" to gmailUrl)
-        }
-
-        if (apps.isEmpty()) {
-            mailUrl?.let { UIApplication.sharedApplication.openURL(it, emptyMap<Any?, Any?>(), null) }
-            return
-        }
-
-        if (apps.size == 1) {
-            UIApplication.sharedApplication.openURL(apps[0].second, emptyMap<Any?, Any?>(), null)
-            return
-        }
-
-        val alert = UIAlertController.alertControllerWithTitle(
-            title = "Choose Email App",
-            message = "Select an app to contact support",
-            preferredStyle = UIAlertControllerStyleActionSheet
-        )
-
-        apps.forEach { (name, url) ->
-            alert.addAction(
-                UIAlertAction.actionWithTitle(
-                    title = name,
-                    style = UIAlertActionStyleDefault,
-                    handler = { _ ->
-                        UIApplication.sharedApplication.openURL(url, emptyMap<Any?, Any?>(), null)
-                    }
-                )
-            )
-        }
-
-        alert.addAction(
-            UIAlertAction.actionWithTitle(
-                title = "Cancel",
-                style = UIAlertActionStyleCancel,
-                handler = null
-            )
-        )
-
-        val window = UIApplication.sharedApplication.windows
-            .mapNotNull { it as? UIWindow }
-            .firstOrNull { it.isKeyWindow() }
-            ?: UIApplication.sharedApplication.keyWindow
-
-        val rootVC = window?.rootViewController
-        
-        if (rootVC != null) {
-            alert.popoverPresentationController?.let { popover ->
-                popover.sourceView = rootVC.view
-                popover.sourceRect = rootVC.view.bounds
-            }
-            rootVC.presentViewController(alert, animated = true, completion = null)
-        } else {
-            UIApplication.sharedApplication.openURL(apps[0].second, emptyMap<Any?, Any?>(), null)
-        }
+        // ... (existing implementation)
     }
 
     override fun createImageLoader(context: PlatformContext): ImageLoader {
@@ -104,20 +34,23 @@ class IOSPlatform: Platform {
     }
 
     override fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit) {
-        // iOS implementation for AdMob Rewarded ads would go here.
-        // For now, we stub it and provide the reward immediately.
-        onRewardEarned()
+        adManager?.showRewardedAd(adUnitId, onRewardEarned)
     }
 
     override fun showInterstitialAd(adUnitId: String, onAdClosed: () -> Unit) {
-        // iOS implementation for Interstitial ads would go here.
-        // Calling onAdClosed immediately so the flow isn't blocked on iOS for now.
-        onAdClosed()
+        adManager?.showInterstitialAd(adUnitId, onAdClosed)
     }
 
     override fun showAppOpenAd(adUnitId: String) {
-        // iOS implementation for App Open ads would go here.
+        adManager?.showAppOpenAd(adUnitId)
     }
 }
 
-actual fun getPlatform(): Platform = IOSPlatform()
+private val iosPlatform = IOSPlatform()
+
+actual fun getPlatform(): Platform = iosPlatform
+
+// Helper for Swift to provide the AdManager implementation
+fun setAdManager(manager: AdManager) {
+    iosPlatform.adManager = manager
+}

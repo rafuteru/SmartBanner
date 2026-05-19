@@ -6,8 +6,12 @@ import platform.UIKit.UIView
 
 var iosAdViewFactory: ((String) -> UIView)? = null
 
-fun MainViewController(createAdView: (String) -> UIView) = ComposeUIViewController {
+fun MainViewController(
+    createAdView: (String) -> UIView,
+    adManager: AdManager
+) = ComposeUIViewController {
     iosAdViewFactory = createAdView
+    setAdManager(adManager) // Set the bridge implementation
     App()
 }
 

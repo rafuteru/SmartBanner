@@ -6,9 +6,12 @@ import GoogleMobileAds
 struct ComposeView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIViewController {
-        return MainViewControllerKt.MainViewController { adUnitId in
-            return BannerViewContainer(adUnitId: adUnitId)
-        }
+        return MainViewControllerKt.MainViewController(
+            createAdView: { adUnitId in
+                return BannerViewContainer(adUnitId: adUnitId)
+            },
+            adManager: IOSAdManager.shared
+        )
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
