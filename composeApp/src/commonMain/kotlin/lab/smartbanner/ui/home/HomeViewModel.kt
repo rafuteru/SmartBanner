@@ -57,15 +57,17 @@ class HomeViewModel(
 
     private fun fetchIdentifier() {
         viewModelScope.launch {
-            // Use the persistent Support ID instead of the transient Firebase UID
             currentIdentifier = authRepository.getAccessCode()
         }
     }
 
-    fun loadTemplates() {
+    fun loadTemplates(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             uiState = HomeUiState.Loading
             try {
+                if (forceRefresh) {
+                    repository.refresh()
+                }
                 val templates = repository.getTemplates()
                 val categories = listOf("All") + templates.map { it.category }.distinct()
                 

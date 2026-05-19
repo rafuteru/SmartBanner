@@ -210,7 +210,7 @@ class TemplatePreviewViewModel(
             val accessCode = authRepository.getAccessCode()
             contactSupport(
                 subject = "Access Request: $templateName",
-                body = "Hi, I would like to get access to the '$templateName' template. Please let me know the process.",
+                body = "Hi, I would like to get access to the '$templateName' template. Please let me know the process. This will be paid service",
                 accessCode = accessCode
             )
         }

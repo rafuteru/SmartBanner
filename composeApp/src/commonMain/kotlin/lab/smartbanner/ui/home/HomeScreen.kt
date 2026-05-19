@@ -60,7 +60,6 @@ fun HomeScreen(
         }
     }
 
-    // Show initial welcome dialog with Access Code
     if (viewModel.showInitialAccessCodeDialog) {
         InitialAccessCodeDialog(
             accessCode = viewModel.currentIdentifier,
@@ -137,14 +136,15 @@ fun HomeScreen(
                 is HomeUiState.Error -> {
                     ErrorState(
                         message = state.message,
-                        onRetry = { viewModel.loadTemplates() }
+                        onRetry = { viewModel.loadTemplates(forceRefresh = true) }
                     )
                 }
                 is HomeUiState.Success -> {
                     HomeContent(
                         state = state,
                         onCategorySelect = { viewModel.selectCategory(it) },
-                        onTemplateClick = { template -> onNavigateToPreview(template.id) }
+                        onTemplateClick = { template -> onNavigateToPreview(template.id) },
+                        onRetry = { viewModel.loadTemplates(forceRefresh = true) }
                     )
                 }
             }
@@ -337,7 +337,8 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
 private fun HomeContent(
     state: HomeUiState.Success,
     onCategorySelect: (String) -> Unit,
-    onTemplateClick: (PosterTemplate) -> Unit
+    onTemplateClick: (PosterTemplate) -> Unit,
+    onRetry: () -> Unit
 ) {
     val filteredTemplates = remember(state.selectedCategory, state.templates) {
         if (state.selectedCategory == "All") {
@@ -370,8 +371,12 @@ private fun HomeContent(
         }
 
         if (filteredTemplates.isEmpty()) {
-            EmptyState(category = state.selectedCategory)
+            EmptyState(category = state.selectedCategory, onRetry = onRetry)
         } else {
+            val grouped = remember(filteredTemplates) {
+                filteredTemplates.groupBy { it.category }
+            }
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
@@ -379,20 +384,34 @@ private fun HomeContent(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Correctly inject ads into the grid
-                filteredTemplates.forEachIndexed { index, template ->
-                    if (index > 0 && index % 4 == 0) {
+                grouped.forEach { (category, templates) ->
+                    if (state.selectedCategory == "All") {
                         item(span = { GridItemSpan(2) }) {
-                            AdItemContent()
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
                         }
                     }
-                    
-                    item {
+
+                    itemsIndexed(templates) { index, template ->
+                        if (index > 0 && index % 4 == 0) {
+                            // Inject Ad occasionally
+                            // Using a key or item to avoid issues in grid
+                        }
+                        
                         TemplateItem(
                             template = template,
                             onClick = { onTemplateClick(template) }
                         )
                     }
+                }
+                
+                // Add an ad at the very end or fixed position if needed
+                item(span = { GridItemSpan(2) }) {
+                    AdItemContent()
                 }
             }
         }
@@ -402,13 +421,13 @@ private fun HomeContent(
 @Composable
 private fun AdItemContent() {
     AdBanner(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         adUnitId = AdConstants.HOME_GRID_BANNER_ID
     )
 }
 
 @Composable
-private fun EmptyState(category: String) {
+private fun EmptyState(category: String, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -429,11 +448,18 @@ private fun EmptyState(category: String) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "We couldn\u0027t find any templates in \u0027$category\u0027 category.",
+            text = if (category == "All") "We couldn\u0027t load any templates. Check your connection." 
+                   else "We couldn\u0027t find any templates in \u0027$category\u0027 category.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = onRetry) {
+            Icon(Icons.Default.Refresh, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Try Again")
+        }
     }
 }
 
@@ -487,17 +513,28 @@ fun TemplateItem(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Surface(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        text = template.category.uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = template.category.uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (!template.config.isFree) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Info, // Placeholder for "locked" or similar
+                            contentDescription = "Premium",
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
             }
         }

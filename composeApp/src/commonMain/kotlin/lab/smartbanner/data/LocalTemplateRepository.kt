@@ -1,13 +1,10 @@
 package lab.smartbanner.data
 
 import kotlinx.serialization.json.Json
-import lab.smartbanner.Res
 import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.ConfigRepository
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterTemplate
-import lab.smartbanner.model.TemplateConfig
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 class LocalTemplateRepository(
     private val authRepository: AccessCodeRepository,
@@ -18,102 +15,61 @@ class LocalTemplateRepository(
         coerceInputValues = true
     }
 
-    private val templatePaths = listOf(
-        "files/templates/jewellery_1.json",
-        "files/templates/festival_1.json",
-        "files/templates/clothing_1.json",
-        "files/templates/grocery_1.json",
-        "files/templates/coaching_1.json",
-    )
-
-    @OptIn(ExperimentalResourceApi::class)
     override suspend fun getTemplates(): List<PosterTemplate> {
-        // 1. Load local templates
-        val templates = templatePaths.mapNotNull { path ->
-            try {
-                val bytes = Res.readBytes(path)
-                val jsonString = bytes.decodeToString()
-                json.decodeFromString<PosterTemplate>(jsonString)
-            } catch (e: Exception) {
-                null
-            }
-        }.toMutableList()
-
-        // 2. Fetch and merge remote templates (Owned templates)
         val supportId = authRepository.getAccessCode()
-        val ownedTemplateIds = try {
+        
+        // 1. Fetch user specific template IDs
+        val userTemplateIds = try {
             configRepository.getTemplateIdsForUser(supportId).toSet()
         } catch (e: Exception) {
             emptySet()
         }
 
-        ownedTemplateIds.forEach { templateKey ->
+        // 2. Fetch global template IDs from "premium_banner"
+        val globalTemplateIds = try {
+            configRepository.getGlobalTemplateIds()
+        } catch (e: Exception) {
+            emptyList()
+        }
+
+        // Combine all IDs (prioritize user specific ones in the raw list for processing)
+        val allIds = (userTemplateIds + globalTemplateIds).distinct()
+        
+        val templates = mutableListOf<PosterTemplate>()
+
+        allIds.forEach { templateId ->
             try {
-                val templateJson = configRepository.getTemplateJson(templateKey)
+                val templateJson = configRepository.getTemplateJson(templateId)
                 if (!templateJson.isNullOrBlank()) {
-                    val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
-                    // Mark as free since the user owns it
-                    val unlockedTemplate = remoteTemplate.copy(config = remoteTemplate.config.copy(isFree = true))
+                    val template = json.decodeFromString<PosterTemplate>(templateJson)
                     
-                    val existingIndex = templates.indexOfFirst { it.id == unlockedTemplate.id }
-                    if (existingIndex != -1) {
-                        templates[existingIndex] = unlockedTemplate
+                    // If it's a user-owned template, it's always free for them
+                    val finalTemplate = if (templateId in userTemplateIds) {
+                        template.copy(config = template.config.copy(isFree = true))
                     } else {
-                        templates.add(unlockedTemplate)
+                        template
                     }
+                    
+                    templates.add(finalTemplate)
                 }
             } catch (e: Exception) {
-                // Skip templates that fail to parse
+                // Skip failed ones
             }
         }
 
-        // 3. Fetch premium templates (Paid templates)
-        try {
-            val premiumTemplateIds = configRepository.getPremiumTemplateIds()
-            // Avoid duplicates: If already owned, don't show in premium/locked list
-            val filteredPremiumIds = premiumTemplateIds.filter { it !in ownedTemplateIds }
-
-            filteredPremiumIds.forEach { templateKey ->
-                try {
-                    val templateJson = configRepository.getTemplateJson(templateKey)
-                    if (!templateJson.isNullOrBlank()) {
-                        val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
-                        // Mark as not free and ensure category is "Premium"
-                        val premiumTemplate = remoteTemplate.copy(
-                            category = "Premium",
-                            config = remoteTemplate.config.copy(isFree = false)
-                        )
-                        
-                        val existingIndex = templates.indexOfFirst { it.id == premiumTemplate.id }
-                        if (existingIndex == -1) {
-                            templates.add(premiumTemplate)
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Skip
-                }
-            }
-        } catch (e: Exception) {
-            // Gracefully handle remote fetch failures
-        }
-
-        if (templates.isEmpty()) {
-            templates.add(
-                PosterTemplate(
-                    id = "default_fallback",
-                    name = "Default Template",
-                    category = "General",
-                    config = TemplateConfig(isFree = true)
-                )
-            )
-        }
-
-        return templates
+        // Prioritize: User templates first (determines category order), then by category
+        return templates.sortedWith(
+            compareByDescending<PosterTemplate> { it.id in userTemplateIds }
+                .thenBy { it.category }
+                .thenBy { it.name }
+        )
     }
 
     override suspend fun getTemplateById(id: String): PosterTemplate? {
-        // For individual template fetch, we might want to ensure the lock state is correct
-        // However, getTemplates() already handles the merging logic.
         return getTemplates().find { it.id == id }
+    }
+
+    override suspend fun refresh(): Boolean {
+        return configRepository.refresh()
     }
 }

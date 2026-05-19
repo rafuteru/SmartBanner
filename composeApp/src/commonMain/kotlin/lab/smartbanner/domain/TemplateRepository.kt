@@ -5,4 +5,5 @@ import lab.smartbanner.model.PosterTemplate
 interface TemplateRepository {
     suspend fun getTemplates(): List<PosterTemplate>
     suspend fun getTemplateById(id: String): PosterTemplate?
+    suspend fun refresh(): Boolean
 }
