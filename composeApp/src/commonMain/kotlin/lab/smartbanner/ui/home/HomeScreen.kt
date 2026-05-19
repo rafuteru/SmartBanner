@@ -50,6 +50,7 @@ fun HomeScreen(
 ) {
     val uiState = viewModel.uiState
     var showIdDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     var isCodeVisible by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
 
@@ -97,7 +98,7 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onLogout) {
+                    IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
                 },
@@ -210,6 +211,29 @@ fun HomeScreen(
             dismissButton = {
                 TextButton(onClick = { showIdDialog = false }) {
                     Text("Close")
+                }
+            }
+        )
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Logout") },
+            text = { Text("Are you sure you want to logout? Make sure you have saved your Access Code to access your data later.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    }
+                ) {
+                    Text("Logout", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel")
                 }
             }
         )
