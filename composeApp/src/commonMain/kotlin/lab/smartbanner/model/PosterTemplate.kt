@@ -46,14 +46,15 @@ data class PosterTemplate(
 
 @Serializable
 data class TemplateConfig(
-    val isLocked: Boolean = true
+    val isFree: Boolean = false
 )
 
 @Serializable
 data class PosterTheme(
     val id: String,
     val name: String,
-    val colors: Map<String, String> // Map of colorKey to hex color
+    val colors: Map<String, String>, // Map of colorKey to hex color
+    val isFree: Boolean = true
 )
 
 @Serializable

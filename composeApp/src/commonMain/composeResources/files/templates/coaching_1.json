@@ -5,7 +5,7 @@
   "width": 1080.0,
   "height": 1350.0,
   "config": {
-    "isLocked": false
+    "isFree": true
   },
   "background": {
     "color": "#FFFFFF",

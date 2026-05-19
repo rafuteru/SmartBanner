@@ -57,7 +57,7 @@ class TemplatePreviewViewModel(
             try {
                 val template = repository.getTemplateById(id)
                 if (template != null) {
-                    val isLocked = template.config.isLocked
+                    val isLocked = !template.config.isFree
                     
                     val content = initialContent ?: run {
                         val draft = draftRepository.getLatestDraft().first()

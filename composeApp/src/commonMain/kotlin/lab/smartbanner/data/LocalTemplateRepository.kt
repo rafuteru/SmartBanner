@@ -52,8 +52,8 @@ class LocalTemplateRepository(
                 val templateJson = configRepository.getTemplateJson(templateKey)
                 if (!templateJson.isNullOrBlank()) {
                     val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
-                    // Mark as unlocked since the user owns it
-                    val unlockedTemplate = remoteTemplate.copy(config = remoteTemplate.config.copy(isLocked = false))
+                    // Mark as free since the user owns it
+                    val unlockedTemplate = remoteTemplate.copy(config = remoteTemplate.config.copy(isFree = true))
                     
                     val existingIndex = templates.indexOfFirst { it.id == unlockedTemplate.id }
                     if (existingIndex != -1) {
@@ -67,7 +67,7 @@ class LocalTemplateRepository(
             }
         }
 
-        // 3. Fetch premium templates (Locked templates)
+        // 3. Fetch premium templates (Paid templates)
         try {
             val premiumTemplateIds = configRepository.getPremiumTemplateIds()
             // Avoid duplicates: If already owned, don't show in premium/locked list
@@ -78,10 +78,10 @@ class LocalTemplateRepository(
                     val templateJson = configRepository.getTemplateJson(templateKey)
                     if (!templateJson.isNullOrBlank()) {
                         val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
-                        // Mark as locked and ensure category is "Premium"
+                        // Mark as not free and ensure category is "Premium"
                         val premiumTemplate = remoteTemplate.copy(
                             category = "Premium",
-                            config = remoteTemplate.config.copy(isLocked = true)
+                            config = remoteTemplate.config.copy(isFree = false)
                         )
                         
                         val existingIndex = templates.indexOfFirst { it.id == premiumTemplate.id }
@@ -103,7 +103,7 @@ class LocalTemplateRepository(
                     id = "default_fallback",
                     name = "Default Template",
                     category = "General",
-                    config = TemplateConfig(isLocked = false)
+                    config = TemplateConfig(isFree = true)
                 )
             )
         }

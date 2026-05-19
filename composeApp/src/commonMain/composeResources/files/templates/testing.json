@@ -5,7 +5,7 @@
   "width": 360,
   "height": 600,
   "config": {
-    "isLocked": false
+    "isFree": false
   },
   "background": {
     "color": "#FFE600",

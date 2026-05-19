@@ -379,7 +379,7 @@ private fun PreviewContent(
                     
                     // Unlock Button (Purchase Flow / Contact Support)
                     Button(
-                        onClick = { viewModel.contactSupportForLockedTemplate(template.id) },
+                        onClick = { viewModel.contactSupportForLockedTemplate(template.name) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
