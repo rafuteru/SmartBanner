@@ -24,6 +24,7 @@ class AccessCodeRepositoryImpl(
     private object Keys {
         val IS_AUTHENTICATED = booleanPreferencesKey("is_authenticated")
         val ACCESS_CODE = stringPreferencesKey("access_code")
+        val HAS_SEEN_INITIAL_DIALOG = booleanPreferencesKey("has_seen_initial_dialog")
     }
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -60,11 +61,22 @@ class AccessCodeRepositoryImpl(
         dataStore.edit { preferences ->
             preferences[Keys.IS_AUTHENTICATED] = false
             preferences.remove(Keys.ACCESS_CODE)
+            preferences.remove(Keys.HAS_SEEN_INITIAL_DIALOG)
         }
         _authState.value = AuthState.Idle
     }
 
     override suspend fun getAccessCode(): String {
         return dataStore.data.map { it[Keys.ACCESS_CODE] ?: "" }.first()
+    }
+
+    override suspend fun hasSeenInitialDialog(): Boolean {
+        return dataStore.data.map { it[Keys.HAS_SEEN_INITIAL_DIALOG] ?: false }.first()
+    }
+
+    override suspend fun setHasSeenInitialDialog(seen: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[Keys.HAS_SEEN_INITIAL_DIALOG] = seen
+        }
     }
 }

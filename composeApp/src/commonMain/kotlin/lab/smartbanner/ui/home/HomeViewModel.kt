@@ -31,9 +31,28 @@ class HomeViewModel(
     var currentIdentifier: String by mutableStateOf("")
         private set
 
+    var showInitialAccessCodeDialog: Boolean by mutableStateOf(false)
+        private set
+
     init {
         loadTemplates()
         fetchIdentifier()
+        checkInitialDialog()
+    }
+
+    private fun checkInitialDialog() {
+        viewModelScope.launch {
+            if (!authRepository.hasSeenInitialDialog()) {
+                showInitialAccessCodeDialog = true
+            }
+        }
+    }
+
+    fun dismissInitialDialog() {
+        showInitialAccessCodeDialog = false
+        viewModelScope.launch {
+            authRepository.setHasSeenInitialDialog(true)
+        }
     }
 
     private fun fetchIdentifier() {

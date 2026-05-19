@@ -8,6 +8,8 @@ interface AccessCodeRepository {
     suspend fun signOut()
     suspend fun isAuthenticated(): Boolean
     suspend fun getAccessCode(): String
+    suspend fun hasSeenInitialDialog(): Boolean
+    suspend fun setHasSeenInitialDialog(seen: Boolean)
 }
 
 sealed class AuthState {
