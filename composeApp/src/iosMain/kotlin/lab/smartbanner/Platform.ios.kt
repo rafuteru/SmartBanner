@@ -105,8 +105,18 @@ class IOSPlatform: Platform {
 
     override fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit) {
         // iOS implementation for AdMob Rewarded ads would go here.
-        // For now, we stub it and provide the reward immediately in debug or as a placeholder.
+        // For now, we stub it and provide the reward immediately.
         onRewardEarned()
+    }
+
+    override fun showInterstitialAd(adUnitId: String, onAdClosed: () -> Unit) {
+        // iOS implementation for Interstitial ads would go here.
+        // Calling onAdClosed immediately so the flow isn't blocked on iOS for now.
+        onAdClosed()
+    }
+
+    override fun showAppOpenAd(adUnitId: String) {
+        // iOS implementation for App Open ads would go here.
     }
 }
 

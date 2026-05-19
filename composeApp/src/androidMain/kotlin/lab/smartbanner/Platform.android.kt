@@ -12,7 +12,11 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.appopen.AppOpenAd
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
@@ -67,15 +71,52 @@ class AndroidPlatform(private val context: Context?) : Platform {
         val activity = context?.findActivity() ?: return
         
         RewardedAd.load(activity, adUnitId, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                // In a real app, you might want to show a toast or callback error
-            }
+            override fun onAdFailedToLoad(adError: LoadAdError) {}
 
             override fun onAdLoaded(ad: RewardedAd) {
+                ad.fullScreenContentCallback = object : FullScreenContentCallback() {}
                 ad.show(activity) {
                     onRewardEarned()
                 }
             }
+        })
+    }
+
+    override fun showInterstitialAd(adUnitId: String, onAdClosed: () -> Unit) {
+        val activity = context?.findActivity() ?: run {
+            onAdClosed()
+            return
+        }
+
+        InterstitialAd.load(activity, adUnitId, AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                onAdClosed()
+            }
+
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        onAdClosed()
+                    }
+
+                    override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
+                        onAdClosed()
+                    }
+                }
+                interstitialAd.show(activity)
+            }
+        })
+    }
+
+    override fun showAppOpenAd(adUnitId: String) {
+        val activity = context?.findActivity() ?: return
+        
+        AppOpenAd.load(activity, adUnitId, AdRequest.Builder().build(), AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, object : AppOpenAd.AppOpenAdLoadCallback() {
+            override fun onAdLoaded(ad: AppOpenAd) {
+                ad.show(activity)
+            }
+
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {}
         })
     }
 

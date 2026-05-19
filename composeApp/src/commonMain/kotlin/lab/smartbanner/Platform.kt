@@ -10,6 +10,8 @@ interface Platform {
     fun openEmail(recipient: String, subject: String, body: String)
     fun createImageLoader(context: PlatformContext): ImageLoader
     fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit)
+    fun showInterstitialAd(adUnitId: String, onAdClosed: () -> Unit)
+    fun showAppOpenAd(adUnitId: String)
 }
 
 expect fun getPlatform(): Platform

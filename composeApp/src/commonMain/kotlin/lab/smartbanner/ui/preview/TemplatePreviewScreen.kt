@@ -92,12 +92,15 @@ fun TemplatePreviewScreen(
                         }
                         IconButton(
                             onClick = {
-                                scope.launch {
-                                    try {
-                                        val bitmap = graphicsLayer.toImageBitmap()
-                                        viewModel.exportPoster(bitmap)
-                                    } catch (e: Exception) {
-                                        snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                // Trigger Interstitial Ad before Exporting
+                                getPlatform().showInterstitialAd(AdConstants.INTERSTITIAL_AD_ID) {
+                                    scope.launch {
+                                        try {
+                                            val bitmap = graphicsLayer.toImageBitmap()
+                                            viewModel.exportPoster(bitmap)
+                                        } catch (e: Exception) {
+                                            snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                        }
                                     }
                                 }
                             }
@@ -366,8 +369,7 @@ private fun PreviewContent(
                     Text(
                         "Premium Template",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                        fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "This template is exclusive to our registered customers. Contact support to unlock this and many other premium designs.",

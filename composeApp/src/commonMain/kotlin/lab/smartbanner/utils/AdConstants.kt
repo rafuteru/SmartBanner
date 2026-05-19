@@ -15,6 +15,9 @@ object AdConstants {
     private const val ANDROID_REWARDED_TEST_ID = "ca-app-pub-3940256099942544/5224354917"
     private const val IOS_REWARDED_TEST_ID = "ca-app-pub-3940256099942544/1712485313"
 
+    private const val ANDROID_INTERSTITIAL_TEST_ID = "ca-app-pub-3940256099942544/1033173712"
+    private const val IOS_INTERSTITIAL_TEST_ID = "ca-app-pub-3940256099942544/4411468910"
+
     // --- HOME GRID BANNER ---
     private const val ANDROID_HOME_ID = "ca-app-pub-6016705200049000/2969709036"
     private const val IOS_HOME_ID = "ca-app-pub-6016705200049000/5412039547"
@@ -38,4 +41,13 @@ object AdConstants {
     val REWARDED_AD_ID: String
         get() = if (USE_TEST_ADS) (if (isAndroid) ANDROID_REWARDED_TEST_ID else IOS_REWARDED_TEST_ID)
         else (if (isAndroid) ANDROID_REWARDED_ID else IOS_REWARDED_ID)
+
+    // --- INTERSTITIAL AD ---
+    // Note: Add your production Interstitial IDs here when ready
+    private const val ANDROID_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712" 
+    private const val IOS_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/4411468910"
+
+    val INTERSTITIAL_AD_ID: String
+        get() = if (USE_TEST_ADS) (if (isAndroid) ANDROID_INTERSTITIAL_TEST_ID else IOS_INTERSTITIAL_TEST_ID)
+        else (if (isAndroid) ANDROID_INTERSTITIAL_ID else IOS_INTERSTITIAL_ID)
 }
