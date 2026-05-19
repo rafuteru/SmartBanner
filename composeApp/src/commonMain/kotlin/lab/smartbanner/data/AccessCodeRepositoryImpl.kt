@@ -50,6 +50,8 @@ class AccessCodeRepositoryImpl(
             dataStore.edit { preferences ->
                 preferences[Keys.IS_AUTHENTICATED] = true
                 preferences[Keys.ACCESS_CODE] = code
+                // When explicitly signing in with a code, we might want to show the dialog again 
+                // if it's a new code, but let's keep it simple for now.
             }
             _authState.value = AuthState.Authenticated
         } catch (e: Exception) {
@@ -58,12 +60,18 @@ class AccessCodeRepositoryImpl(
     }
 
     override suspend fun signOut() {
-        dataStore.edit { preferences ->
-            preferences[Keys.IS_AUTHENTICATED] = false
-            preferences.remove(Keys.ACCESS_CODE)
-            preferences.remove(Keys.HAS_SEEN_INITIAL_DIALOG)
+        _authState.value = AuthState.Loading
+        try {
+            dataStore.edit { preferences ->
+                preferences[Keys.IS_AUTHENTICATED] = false
+                preferences.remove(Keys.ACCESS_CODE)
+                // We keep HAS_SEEN_INITIAL_DIALOG to prevent the flicker of the dialog 
+                // appearing for a split second during the logout transition.
+            }
+            _authState.value = AuthState.Idle
+        } catch (e: Exception) {
+            _authState.value = AuthState.Idle
         }
-        _authState.value = AuthState.Idle
     }
 
     override suspend fun getAccessCode(): String {

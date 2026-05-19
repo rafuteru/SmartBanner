@@ -22,10 +22,8 @@ class AuthViewModel(
     fun signInWithCode(code: String) {
         viewModelScope.launch {
             val trimmedCode = code.trim()
-            val finalCode = if (trimmedCode.isEmpty()) {
+            val finalCode = trimmedCode.ifEmpty {
                 getPlatform().deviceId
-            } else {
-                trimmedCode
             }
             authRepository.signInWithCode(finalCode)
             // Refresh config immediately after sign in to fetch user-specific templates

@@ -42,7 +42,8 @@ class HomeViewModel(
 
     private fun checkInitialDialog() {
         viewModelScope.launch {
-            if (!authRepository.hasSeenInitialDialog()) {
+            // Only show the welcome dialog if the user is authenticated and hasn't seen it
+            if (authRepository.isAuthenticated() && !authRepository.hasSeenInitialDialog()) {
                 showInitialAccessCodeDialog = true
             }
         }

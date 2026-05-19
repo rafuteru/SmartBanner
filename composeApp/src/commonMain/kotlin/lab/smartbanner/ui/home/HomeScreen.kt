@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -397,11 +398,6 @@ private fun HomeContent(
                     }
 
                     itemsIndexed(templates) { index, template ->
-                        if (index > 0 && index % 4 == 0) {
-                            // Inject Ad occasionally
-                            // Using a key or item to avoid issues in grid
-                        }
-                        
                         TemplateItem(
                             template = template,
                             onClick = { onTemplateClick(template) }
@@ -513,7 +509,11 @@ fun TemplateItem(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Surface(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp)
@@ -523,16 +523,35 @@ fun TemplateItem(
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
-                    if (!template.config.isFree) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.Info, // Placeholder for "locked" or similar
-                            contentDescription = "Premium",
-                            modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colorScheme.secondary
+                    
+                    val (label, color) = if (template.config.isFree) {
+                        "FREE" to Color(0xFF4CAF50)
+                    } else {
+                        "PREMIUM" to Color(0xFFFFA000)
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (!template.config.isFree) {
+                            Icon(
+                                imageVector = Icons.Default.WorkspacePremium,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = color
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                        }
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 9.sp
+                            ),
+                            color = color
                         )
                     }
                 }
