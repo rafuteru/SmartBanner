@@ -1,8 +1,16 @@
 package lab.smartbanner.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class TemplateMapping(
+    val key: String,
+    val id: String
+)
+
 interface ConfigRepository {
-    fun getTemplateIdsForUser(userId: String): List<String>
-    fun getGlobalTemplateIds(): List<String>
-    suspend fun getTemplateJson(templateId: String): String?
+    fun getTemplateMappingsForUser(userId: String): List<TemplateMapping>
+    fun getGlobalTemplateMappings(): List<TemplateMapping>
+    suspend fun getTemplateJson(key: String): String?
     suspend fun refresh(): Boolean
 }

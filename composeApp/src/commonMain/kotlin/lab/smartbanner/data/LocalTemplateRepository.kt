@@ -18,37 +18,39 @@ class LocalTemplateRepository(
     override suspend fun getTemplates(): List<PosterTemplate> {
         val supportId = authRepository.getAccessCode()
         
-        // 1. Fetch user specific template IDs
-        val userTemplateIds = try {
-            configRepository.getTemplateIdsForUser(supportId).toSet()
+        // 1. Fetch user specific template mappings (key and id)
+        val userMappings = try {
+            configRepository.getTemplateMappingsForUser(supportId)
         } catch (e: Exception) {
-            emptySet()
+            emptyList()
         }
+        val userTemplateIds = userMappings.map { it.id }.toSet()
 
-        // 2. Fetch global template IDs from "premium_banner"
-        val globalTemplateIds = try {
-            configRepository.getGlobalTemplateIds()
+        // 2. Fetch global template mappings
+        val globalMappings = try {
+            configRepository.getGlobalTemplateMappings()
         } catch (e: Exception) {
             emptyList()
         }
 
-        // Remove duplicates: If a template is in userTemplateIds, we don't need to process it from globalTemplateIds
-        // because we want the user-specific "free" version to take precedence.
-        val filteredGlobalIds = globalTemplateIds.filter { it !in userTemplateIds }
+        // 3. Remove global mappings if the template ID is already present in user mappings
+        // This ensures the user's specific version (marked as free) takes precedence.
+        val filteredGlobalMappings = globalMappings.filter { it.id !in userTemplateIds }
         
-        // Combine IDs, putting user-specific ones first
-        val allIds = userTemplateIds.toList() + filteredGlobalIds
+        // Combine mappings: User specific ones first
+        val allMappings = userMappings + filteredGlobalMappings
         
         val templates = mutableListOf<PosterTemplate>()
 
-        allIds.forEach { templateId ->
+        allMappings.forEach { mapping ->
             try {
-                val templateJson = configRepository.getTemplateJson(templateId)
+                // Fetch JSON using the 'key'
+                val templateJson = configRepository.getTemplateJson(mapping.key)
                 if (!templateJson.isNullOrBlank()) {
                     val template = json.decodeFromString<PosterTemplate>(templateJson)
                     
-                    // If it's a user-owned template, it's always free for them
-                    val finalTemplate = if (templateId in userTemplateIds) {
+                    // If it's a user-owned template (by ID), it's always free for them
+                    val finalTemplate = if (mapping.id in userTemplateIds) {
                         template.copy(config = template.config.copy(isFree = true))
                     } else {
                         template
@@ -70,6 +72,7 @@ class LocalTemplateRepository(
     }
 
     override suspend fun getTemplateById(id: String): PosterTemplate? {
+        // Note: For fetching a single template, we still go through the logic to ensure correct free/premium status
         return getTemplates().find { it.id == id }
     }
 
