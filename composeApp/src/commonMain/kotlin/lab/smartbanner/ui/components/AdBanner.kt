@@ -6,5 +6,7 @@ import androidx.compose.ui.Modifier
 @Composable
 expect fun AdBanner(
     modifier: Modifier = Modifier,
-    adUnitId: String
+    adUnitId: String,
+    onAdLoaded: () -> Unit = {},
+    onAdFailedToLoad: () -> Unit = {}
 )

@@ -10,11 +10,20 @@ import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun AdBanner(modifier: Modifier, adUnitId: String) {
+actual fun AdBanner(
+    modifier: Modifier,
+    adUnitId: String,
+    onAdLoaded: () -> Unit,
+    onAdFailedToLoad: () -> Unit
+) {
     val factory = iosAdViewFactory
     if (factory != null) {
         UIKitView(
-            factory = { factory(adUnitId) },
+            factory = { 
+                // Note: ideally we would hook into GADBannerViewDelegate here
+                // to call onAdLoaded and onAdFailedToLoad
+                factory(adUnitId) 
+            },
             modifier = modifier.height(50.dp)
         )
     }

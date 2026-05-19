@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -358,6 +355,12 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
     }
 }
 
+private sealed class HomeGridItem {
+    data class Header(val title: String) : HomeGridItem()
+    data class Template(val template: PosterTemplate) : HomeGridItem()
+    object Ad : HomeGridItem()
+}
+
 @Composable
 private fun HomeContent(
     state: HomeUiState.Success,
@@ -371,6 +374,29 @@ private fun HomeContent(
         } else {
             state.templates.filter { it.category == state.selectedCategory }
         }
+    }
+
+    val gridItems = remember(filteredTemplates, state.selectedCategory) {
+        val items = mutableListOf<HomeGridItem>()
+        val grouped = filteredTemplates.groupBy { it.category }
+        var globalIndex = 0
+        
+        grouped.forEach { (category, templates) ->
+            if (state.selectedCategory == "All") {
+                items.add(HomeGridItem.Header(category))
+            }
+            templates.forEach { template ->
+                items.add(HomeGridItem.Template(template))
+                globalIndex++
+                if (globalIndex % 4 == 0) {
+                    items.add(HomeGridItem.Ad)
+                }
+            }
+        }
+        if (items.isNotEmpty() && items.last() !is HomeGridItem.Ad) {
+            items.add(HomeGridItem.Ad)
+        }
+        items
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -398,10 +424,6 @@ private fun HomeContent(
         if (filteredTemplates.isEmpty()) {
             EmptyState(category = state.selectedCategory, onRetry = onRetry)
         } else {
-            val grouped = remember(filteredTemplates) {
-                filteredTemplates.groupBy { it.category }
-            }
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
@@ -409,29 +431,34 @@ private fun HomeContent(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                grouped.forEach { (category, templates) ->
-                    if (state.selectedCategory == "All") {
-                        item(span = { GridItemSpan(2) }) {
-                            Text(
-                                text = category,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
+                items(
+                    items = gridItems,
+                    span = { item ->
+                        when (item) {
+                            is HomeGridItem.Header, HomeGridItem.Ad -> GridItemSpan(2)
+                            is HomeGridItem.Template -> GridItemSpan(1)
                         }
                     }
-
-                    itemsIndexed(templates) { index, template ->
-                        TemplateItem(
-                            template = template,
-                            onClick = { onTemplateClick(template) }
-                        )
+                ) { item ->
+                    when (item) {
+                        is HomeGridItem.Header -> {
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                            )
+                        }
+                        is HomeGridItem.Template -> {
+                            TemplateItem(
+                                template = item.template,
+                                onClick = { onTemplateClick(item.template) }
+                            )
+                        }
+                        HomeGridItem.Ad -> {
+                            AdItemContent()
+                        }
                     }
-                }
-                
-                // Add an ad at the very end or fixed position if needed
-                item(span = { GridItemSpan(2) }) {
-                    AdItemContent()
                 }
             }
         }
@@ -440,10 +467,57 @@ private fun HomeContent(
 
 @Composable
 private fun AdItemContent() {
-    AdBanner(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        adUnitId = AdConstants.HOME_GRID_BANNER_ID
-    )
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp, 
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = "SPONSORED",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Recommended for you",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+            }
+            
+            AdBanner(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                adUnitId = AdConstants.HOME_GRID_BANNER_ID
+            )
+        }
+    }
 }
 
 @Composable
