@@ -102,6 +102,12 @@ class IOSPlatform: Platform {
             }
             .build()
     }
+
+    override fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit) {
+        // iOS implementation for AdMob Rewarded ads would go here.
+        // For now, we stub it and provide the reward immediately in debug or as a placeholder.
+        onRewardEarned()
+    }
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()

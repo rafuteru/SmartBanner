@@ -98,7 +98,8 @@ fun HomeScreen(
                 onClick = {
                     contactSupport(
                         subject = "Custom Design Request",
-                        body = "Hi, I would like to request a custom theme for SmartBanner. My Access Code is: ${viewModel.currentIdentifier}\n\n[Send your design we will add a theme for you.]"
+                        body = "Hi, I would like to request a custom theme for SmartBanner. [Send your design we will add a theme for you.]",
+                        accessCode = viewModel.currentIdentifier
                     )
                 },
                 containerColor = MaterialTheme.colorScheme.primary,

@@ -1,6 +1,8 @@
 package lab.smartbanner
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
@@ -9,6 +11,10 @@ import android.provider.Settings
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 class AndroidPlatform(private val context: Context?) : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -55,6 +61,31 @@ class AndroidPlatform(private val context: Context?) : Platform {
                 add(OkHttpNetworkFetcherFactory())
             }
             .build()
+    }
+
+    override fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit) {
+        val activity = context?.findActivity() ?: return
+        
+        RewardedAd.load(activity, adUnitId, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                // In a real app, you might want to show a toast or callback error
+            }
+
+            override fun onAdLoaded(ad: RewardedAd) {
+                ad.show(activity) {
+                    onRewardEarned()
+                }
+            }
+        })
+    }
+
+    private fun Context.findActivity(): Activity? {
+        var context = this
+        while (context is ContextWrapper) {
+            if (context is Activity) return context
+            context = context.baseContext
+        }
+        return null
     }
 }
 

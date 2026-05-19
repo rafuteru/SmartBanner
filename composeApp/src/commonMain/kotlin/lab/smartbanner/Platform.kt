@@ -9,6 +9,7 @@ interface Platform {
     val deviceId: String
     fun openEmail(recipient: String, subject: String, body: String)
     fun createImageLoader(context: PlatformContext): ImageLoader
+    fun showRewardedAd(adUnitId: String, onRewardEarned: () -> Unit)
 }
 
 expect fun getPlatform(): Platform

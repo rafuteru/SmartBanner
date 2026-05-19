@@ -33,6 +33,7 @@ import lab.smartbanner.renderer.PosterRenderer
 import lab.smartbanner.ui.theme.SimpleColorPicker
 import lab.smartbanner.ui.components.AdBanner
 import lab.smartbanner.utils.AdConstants
+import lab.smartbanner.getPlatform
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,14 +62,17 @@ fun TemplatePreviewScreen(
         }
     }
 
-    val isLocked = (uiState as? PreviewUiState.Success)?.isLocked ?: false
+    val state = uiState as? PreviewUiState.Success
+    val isLocked = state?.isLocked ?: false
+    val isTemporarilyUnlocked = state?.isTemporarilyUnlocked ?: false
+    val effectivelyLocked = isLocked && !isTemporarilyUnlocked
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
-                    val title = (uiState as? PreviewUiState.Success)?.template?.name ?: "Preview"
+                    val title = state?.template?.name ?: "Preview"
                     Text(title, fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
@@ -82,7 +86,7 @@ fun TemplatePreviewScreen(
                     }
                 },
                 actions = {
-                    if (!isLocked) {
+                    if (!effectivelyLocked) {
                         IconButton(onClick = { showResetDialog = true }) {
                             Icon(Icons.Default.RestartAlt, contentDescription = "Reset to Default")
                         }
@@ -105,7 +109,7 @@ fun TemplatePreviewScreen(
             )
         },
         bottomBar = {
-            if (uiState is PreviewUiState.Success && !isLocked) {
+            if (state != null && !effectivelyLocked) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 8.dp,
@@ -132,19 +136,19 @@ fun TemplatePreviewScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (val state = uiState) {
+            when (val s = uiState) {
                 is PreviewUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
                 is PreviewUiState.Error -> {
-                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                    Text(s.message, color = MaterialTheme.colorScheme.error)
                 }
                 is PreviewUiState.Success -> {
                     PreviewContent(
                         templateId = templateId,
-                        state = state,
+                        state = s,
                         viewModel = viewModel,
                         graphicsLayer = graphicsLayer,
                         onCreateTheme = onCreateTheme,
@@ -192,6 +196,9 @@ private fun PreviewContent(
     val template = state.template
     val content = state.content
     val isLocked = state.isLocked
+    val isTemporarilyUnlocked = state.isTemporarilyUnlocked
+    val effectivelyLocked = isLocked && !isTemporarilyUnlocked
+    
     val scrollState = rememberScrollState()
 
     // Use intrinsicHeight for calculating aspect ratio to support dynamic content
@@ -216,7 +223,7 @@ private fun PreviewContent(
                 .shadow(8.dp)
                 .background(Color.White)
                 .drawWithContent {
-                    if (!isLocked) {
+                    if (!effectivelyLocked) {
                         graphicsLayer.record {
                             this@drawWithContent.drawContent()
                         }
@@ -231,7 +238,7 @@ private fun PreviewContent(
                 modifier = Modifier.fillMaxSize()
             )
 
-            if (isLocked) {
+            if (effectivelyLocked) {
                 // Watermark Overlay
                 Box(
                     modifier = Modifier
@@ -278,8 +285,9 @@ private fun PreviewContent(
             modifier = Modifier.fillMaxWidth(),
             adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
         )
-        // Theme Selection - Always show if themes are available, even if locked
-        if (template.themes.isNotEmpty() || (!isLocked && content.userThemes.isNotEmpty())) {
+        
+        // Theme Selection
+        if (template.themes.isNotEmpty() || (!effectivelyLocked && content.userThemes.isNotEmpty())) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -291,7 +299,7 @@ private fun PreviewContent(
                     fontWeight = FontWeight.Bold
                 )
                 
-                if (!isLocked) {
+                if (!effectivelyLocked) {
                     TextButton(onClick = { onCreateTheme(templateId) }) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(4.dp))
@@ -319,7 +327,7 @@ private fun PreviewContent(
                 }
                 
                 // User Custom Themes (Editable & Deletable) - Only if not locked
-                if (!isLocked) {
+                if (!effectivelyLocked) {
                     items(content.userThemes) { theme ->
                         val isSelected = state.selectedThemeId == theme.id
                         ThemeItem(
@@ -336,7 +344,7 @@ private fun PreviewContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        if (isLocked) {
+        if (effectivelyLocked) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -368,14 +376,33 @@ private fun PreviewContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(24.dp))
+                    
+                    // Unlock Button (Purchase Flow / Contact Support)
                     Button(
-                        onClick = { viewModel.contactSupportForLockedTemplate(template.name) },
+                        onClick = { viewModel.contactSupportForLockedTemplate(template.id) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Default.SupportAgent, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text("Contact Support to Unlock")
+                    }
+                    
+                    Spacer(Modifier.height(12.dp))
+                    
+                    // Watch Ad Option
+                    OutlinedButton(
+                        onClick = {
+                            getPlatform().showRewardedAd(AdConstants.REWARDED_AD_ID) {
+                                viewModel.unlockTemporarily()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.PlayCircle, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Watch Ad to Use Once")
                     }
                 }
             }

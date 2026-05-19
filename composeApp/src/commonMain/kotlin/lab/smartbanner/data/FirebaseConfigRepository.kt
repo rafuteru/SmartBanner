@@ -34,6 +34,11 @@ class FirebaseConfigRepository(private val isDebug: Boolean) : ConfigRepository 
         return runCatching { json.decodeFromString<List<String>>(raw) }.getOrDefault(emptyList())
     }
 
+    override fun getPremiumTemplateIds(): List<String> {
+        val raw = config.getValue("premium_banner").asString()
+        return runCatching { json.decodeFromString<List<String>>(raw) }.getOrDefault(emptyList())
+    }
+
     override suspend fun getTemplateJson(templateId: String): String? {
         val raw = config.getValue(templateId).asString().trim()
         if (raw.isEmpty()) return null

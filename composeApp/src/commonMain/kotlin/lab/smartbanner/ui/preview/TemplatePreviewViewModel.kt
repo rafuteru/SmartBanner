@@ -23,7 +23,8 @@ sealed class PreviewUiState {
         val template: PosterTemplate,
         val content: PosterContent,
         val selectedThemeId: String? = null,
-        val isLocked: Boolean = false
+        val isLocked: Boolean = false,
+        val isTemporarilyUnlocked: Boolean = false
     ) : PreviewUiState()
     data class Error(val message: String) : PreviewUiState()
 }
@@ -32,6 +33,7 @@ class TemplatePreviewViewModel(
     private val repository: TemplateRepository,
     private val draftRepository: DraftRepository,
     private val posterExporter: PosterExporter,
+    private val authRepository: AccessCodeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PreviewUiState>(PreviewUiState.Loading)
@@ -72,7 +74,13 @@ class TemplatePreviewViewModel(
                         theme.colors == content.colorMap
                     }?.id
                     
-                    _uiState.value = PreviewUiState.Success(template, content, selectedThemeId, isLocked)
+                    _uiState.value = PreviewUiState.Success(
+                        template = template,
+                        content = content,
+                        selectedThemeId = selectedThemeId,
+                        isLocked = isLocked,
+                        isTemporarilyUnlocked = false
+                    )
                 } else {
                     _uiState.value = PreviewUiState.Error("Template not found")
                 }
@@ -82,6 +90,17 @@ class TemplatePreviewViewModel(
         }
     }
 
+    fun unlockTemporarily() {
+        val currentState = _uiState.value
+        if (currentState is PreviewUiState.Success) {
+            _uiState.value = currentState.copy(isTemporarilyUnlocked = true)
+        }
+    }
+
+    private fun isEffectivelyLocked(state: PreviewUiState.Success): Boolean {
+        return state.isLocked && !state.isTemporarilyUnlocked
+    }
+
     fun applyTheme(theme: PosterTheme) {
         val currentState = _uiState.value
         if (currentState is PreviewUiState.Success) {
@@ -89,14 +108,13 @@ class TemplatePreviewViewModel(
                 colorMap = theme.colors
             )
             _uiState.value = currentState.copy(content = updatedContent, selectedThemeId = theme.id)
-            // Even if locked, we can save the theme selection as a temporary draft/preference
             saveContent(updatedContent, currentState.template.id)
         }
     }
 
     fun updateContent(content: PosterContent) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             _uiState.value = currentState.copy(content = content)
             saveContent(content, currentState.template.id)
         }
@@ -112,7 +130,7 @@ class TemplatePreviewViewModel(
 
     fun resetToDefault() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             val emptyContent = PosterContent()
             _uiState.value = currentState.copy(content = emptyContent, selectedThemeId = null)
             viewModelScope.launch {
@@ -124,7 +142,7 @@ class TemplatePreviewViewModel(
 
     fun addUserTheme(theme: PosterTheme) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             val updatedUserThemes = currentState.content.userThemes.toMutableList()
             val existingIndex = updatedUserThemes.indexOfFirst { it.id == theme.id }
             if (existingIndex != -1) {
@@ -144,7 +162,7 @@ class TemplatePreviewViewModel(
 
     fun deleteUserTheme(themeId: String) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             val updatedUserThemes = currentState.content.userThemes.filter { it.id != themeId }
             val updatedContent = currentState.content.copy(userThemes = updatedUserThemes)
             
@@ -158,7 +176,7 @@ class TemplatePreviewViewModel(
 
     suspend fun saveCurrentDraft() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             if (currentState.content != originalContent) {
                 val draft = PosterDraft(currentState.template.id, currentState.content)
                 draftRepository.saveDraft(draft)
@@ -169,7 +187,7 @@ class TemplatePreviewViewModel(
 
     suspend fun completeEditing() {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             draftRepository.saveTemplateContent(currentState.template.id, currentState.content)
             draftRepository.clearActiveDraft()
         }
@@ -177,7 +195,7 @@ class TemplatePreviewViewModel(
 
     fun exportPoster(bitmap: ImageBitmap) {
         val currentState = _uiState.value
-        if (currentState is PreviewUiState.Success && !currentState.isLocked) {
+        if (currentState is PreviewUiState.Success && !isEffectivelyLocked(currentState)) {
             viewModelScope.launch {
                 val timestamp = Clock.System.now().toEpochMilliseconds()
                 val fileName = "SmartBanner_${currentState.template.id}_$timestamp"
@@ -188,9 +206,13 @@ class TemplatePreviewViewModel(
     }
 
     fun contactSupportForLockedTemplate(templateName: String) {
-        contactSupport(
-            subject = "Access Request: $templateName",
-            body = "Hi, I would like to get access to the '$templateName' template. Please let me know the process."
-        )
+        viewModelScope.launch {
+            val accessCode = authRepository.getAccessCode()
+            contactSupport(
+                subject = "Access Request: $templateName",
+                body = "Hi, I would like to get access to the '$templateName' template. Please let me know the process.",
+                accessCode = accessCode
+            )
+        }
     }
 }

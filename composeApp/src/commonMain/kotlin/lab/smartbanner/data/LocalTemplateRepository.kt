@@ -6,6 +6,7 @@ import lab.smartbanner.domain.AccessCodeRepository
 import lab.smartbanner.domain.ConfigRepository
 import lab.smartbanner.domain.TemplateRepository
 import lab.smartbanner.model.PosterTemplate
+import lab.smartbanner.model.TemplateConfig
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 class LocalTemplateRepository(
@@ -23,8 +24,6 @@ class LocalTemplateRepository(
         "files/templates/clothing_1.json",
         "files/templates/grocery_1.json",
         "files/templates/coaching_1.json",
-//        "files/templates/testing.json",
-//        "files/templates/premium_testing.json",
     )
 
     @OptIn(ExperimentalResourceApi::class)
@@ -40,26 +39,58 @@ class LocalTemplateRepository(
             }
         }.toMutableList()
 
-        // 2. Fetch and merge remote templates
+        // 2. Fetch and merge remote templates (Owned templates)
+        val supportId = authRepository.getAccessCode()
+        val ownedTemplateIds = try {
+            configRepository.getTemplateIdsForUser(supportId).toSet()
+        } catch (e: Exception) {
+            emptySet()
+        }
+
+        ownedTemplateIds.forEach { templateKey ->
+            try {
+                val templateJson = configRepository.getTemplateJson(templateKey)
+                if (!templateJson.isNullOrBlank()) {
+                    val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
+                    // Mark as unlocked since the user owns it
+                    val unlockedTemplate = remoteTemplate.copy(config = remoteTemplate.config.copy(isLocked = false))
+                    
+                    val existingIndex = templates.indexOfFirst { it.id == unlockedTemplate.id }
+                    if (existingIndex != -1) {
+                        templates[existingIndex] = unlockedTemplate
+                    } else {
+                        templates.add(unlockedTemplate)
+                    }
+                }
+            } catch (e: Exception) {
+                // Skip templates that fail to parse
+            }
+        }
+
+        // 3. Fetch premium templates (Locked templates)
         try {
-            // Use persistent Support ID instead of transient User ID
-            val supportId = authRepository.getAccessCode()
-            
-            val remoteLookupKeys = configRepository.getTemplateIdsForUser(supportId)
-            remoteLookupKeys.forEach { templateKey ->
+            val premiumTemplateIds = configRepository.getPremiumTemplateIds()
+            // Avoid duplicates: If already owned, don't show in premium/locked list
+            val filteredPremiumIds = premiumTemplateIds.filter { it !in ownedTemplateIds }
+
+            filteredPremiumIds.forEach { templateKey ->
                 try {
                     val templateJson = configRepository.getTemplateJson(templateKey)
                     if (!templateJson.isNullOrBlank()) {
                         val remoteTemplate = json.decodeFromString<PosterTemplate>(templateJson)
-                        val existingIndex = templates.indexOfFirst { it.id == remoteTemplate.id }
-                        if (existingIndex != -1) {
-                            templates[existingIndex] = remoteTemplate
-                        } else {
-                            templates.add(remoteTemplate)
+                        // Mark as locked and ensure category is "Premium"
+                        val premiumTemplate = remoteTemplate.copy(
+                            category = "Premium",
+                            config = remoteTemplate.config.copy(isLocked = true)
+                        )
+                        
+                        val existingIndex = templates.indexOfFirst { it.id == premiumTemplate.id }
+                        if (existingIndex == -1) {
+                            templates.add(premiumTemplate)
                         }
                     }
                 } catch (e: Exception) {
-                    // Skip templates that fail to parse
+                    // Skip
                 }
             }
         } catch (e: Exception) {
@@ -71,7 +102,8 @@ class LocalTemplateRepository(
                 PosterTemplate(
                     id = "default_fallback",
                     name = "Default Template",
-                    category = "General"
+                    category = "General",
+                    config = TemplateConfig(isLocked = false)
                 )
             )
         }
@@ -80,6 +112,8 @@ class LocalTemplateRepository(
     }
 
     override suspend fun getTemplateById(id: String): PosterTemplate? {
+        // For individual template fetch, we might want to ensure the lock state is correct
+        // However, getTemplates() already handles the merging logic.
         return getTemplates().find { it.id == id }
     }
 }
