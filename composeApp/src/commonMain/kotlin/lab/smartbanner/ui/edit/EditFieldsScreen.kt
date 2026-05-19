@@ -2,25 +2,50 @@ package lab.smartbanner.ui.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import lab.smartbanner.model.ImageElement
 import lab.smartbanner.model.PosterContent
 import lab.smartbanner.model.TextElement
-import lab.smartbanner.ui.components.AdBanner
+import lab.smartbanner.ui.components.StyledAdBanner
 import lab.smartbanner.ui.preview.PreviewUiState
 import lab.smartbanner.ui.preview.TemplatePreviewViewModel
 import lab.smartbanner.utils.AdConstants
@@ -95,8 +120,8 @@ fun EditFieldsScreen(
                             .padding(16.dp)
                     ) {
                         // High-visibility Ad placement at the very top
-                        AdBanner(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        StyledAdBanner(
+                            modifier = Modifier.padding(bottom = 16.dp),
                             adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
                         )
 
@@ -181,8 +206,8 @@ fun EditFieldsScreen(
 
                             // Inject another ad after 3 items for high engagement
                             if (index == 2 && textElements.size > 4) {
-                                AdBanner(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                StyledAdBanner(
+                                    modifier = Modifier.padding(vertical = 16.dp),
                                     adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
                                 )
                             }

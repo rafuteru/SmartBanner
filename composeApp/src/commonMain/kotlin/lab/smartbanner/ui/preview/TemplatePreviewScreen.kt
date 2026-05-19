@@ -3,7 +3,20 @@ package lab.smartbanner.ui.preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -11,30 +24,61 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import lab.smartbanner.getPlatform
 import lab.smartbanner.model.PosterTheme
 import lab.smartbanner.renderer.PosterRenderer
-import lab.smartbanner.ui.theme.SimpleColorPicker
-import lab.smartbanner.ui.components.AdBanner
+import lab.smartbanner.ui.components.StyledAdBanner
 import lab.smartbanner.utils.AdConstants
-import lab.smartbanner.getPlatform
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -284,7 +328,7 @@ private fun PreviewContent(
 
         Spacer(modifier = Modifier.height(32.dp))
         // Use the SECOND Ad Unit ID here
-        AdBanner(
+        StyledAdBanner(
             modifier = Modifier.fillMaxWidth(),
             adUnitId = AdConstants.PREVIEW_BOTTOM_BANNER_ID
         )
@@ -404,31 +448,26 @@ private fun PreviewContent(
                     ) {
                         Icon(Icons.Default.PlayCircle, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Watch Ad to Use Once")
+                        Text("Watch Ad to Unlock for 1 Hour")
                     }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(60.dp))
     }
 
-    // Delete Confirmation Dialog
-    themeToDelete?.let { theme ->
+    if (themeToDelete != null) {
         AlertDialog(
             onDismissRequest = { themeToDelete = null },
             title = { Text("Delete Theme") },
-            text = { Text("Are you sure you want to delete \u0027${theme.name}\u0027?") },
+            text = { Text("Are you sure you want to delete the theme \"${themeToDelete?.name}\"?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val idToDelete = theme.id
+                        themeToDelete?.let { viewModel.deleteUserTheme(it.id) }
                         themeToDelete = null
-                        viewModel.deleteUserTheme(idToDelete)
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    }
                 ) {
-                    Text("Delete")
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -441,14 +480,13 @@ private fun PreviewContent(
 }
 
 @Composable
-fun ThemeItem(
+private fun ThemeItem(
     name: String,
     swatchColor: String,
     isSelected: Boolean,
     onClick: () -> Unit,
     onEdit: (() -> Unit)? = null,
-    onDelete: (() -> Unit)? = null,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
+    onDelete: (() -> Unit)? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -456,53 +494,44 @@ fun ThemeItem(
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .size(60.dp)
+                .clip(CircleShape)
                 .background(Color(parseColor(swatchColor)))
                 .border(
-                    width = if (isSelected) 3.5.dp else 1.dp,
+                    width = if (isSelected) 3.dp else 1.dp,
                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = CircleShape
                 )
                 .clickable { onClick() },
             contentAlignment = Alignment.Center
         ) {
-            if (icon != null) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-            } else if (isSelected) {
-                Box(
-                    modifier = Modifier.size(24.dp).background(Color.White.copy(alpha = 0.8f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                }
+            if (isSelected) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = if (isColorDark(swatchColor)) Color.White else Color.Black
+                )
             }
         }
         
         Spacer(modifier = Modifier.height(4.dp))
         
         Text(
-            name, 
-            fontSize = 11.sp, 
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            text = name,
+            style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
-            textAlign = TextAlign.Center,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            textAlign = TextAlign.Center
         )
-
-        // Show edit/delete options for user themes
+        
         if (onEdit != null || onDelete != null) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                onEdit?.let {
-                    IconButton(onClick = it, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+            Row {
+                if (onEdit != null) {
+                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(14.dp))
                     }
                 }
-                onDelete?.let {
-                    IconButton(onClick = it, modifier = Modifier.size(24.dp)) {
+                if (onDelete != null) {
+                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -511,21 +540,23 @@ fun ThemeItem(
     }
 }
 
-fun parseColor(hex: String): Int {
-    return try {
-        if (hex.startsWith("#")) {
-            val h = hex.substring(1)
-            if (h.length == 6) {
-                (0xFF000000 or h.toLong(16)).toInt()
-            } else if (h.length == 8) {
-                h.toLong(16).toInt()
-            } else {
-                0xFF000000.toInt()
-            }
-        } else {
-            0xFF000000.toInt()
+fun parseColor(colorString: String): Long {
+    if (colorString.startsWith("#")) {
+        val hex = colorString.substring(1)
+        return when (hex.length) {
+            6 -> 0xFF000000 or hex.toLong(16)
+            8 -> hex.toLong(16)
+            else -> 0xFF000000
         }
-    } catch (e: Exception) {
-        0xFF000000.toInt()
     }
+    return 0xFF000000
+}
+
+fun isColorDark(colorString: String): Boolean {
+    val color = parseColor(colorString)
+    val r = (color shr 16 and 0xFF).toInt()
+    val g = (color shr 8 and 0xFF).toInt()
+    val b = (color and 0xFF).toInt()
+    val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance < 0.5
 }
