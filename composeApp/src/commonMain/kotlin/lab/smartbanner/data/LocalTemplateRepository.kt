@@ -32,8 +32,12 @@ class LocalTemplateRepository(
             emptyList()
         }
 
-        // Combine all IDs (prioritize user specific ones in the raw list for processing)
-        val allIds = (userTemplateIds + globalTemplateIds).distinct()
+        // Remove duplicates: If a template is in userTemplateIds, we don't need to process it from globalTemplateIds
+        // because we want the user-specific "free" version to take precedence.
+        val filteredGlobalIds = globalTemplateIds.filter { it !in userTemplateIds }
+        
+        // Combine IDs, putting user-specific ones first
+        val allIds = userTemplateIds.toList() + filteredGlobalIds
         
         val templates = mutableListOf<PosterTemplate>()
 
@@ -57,7 +61,7 @@ class LocalTemplateRepository(
             }
         }
 
-        // Prioritize: User templates first (determines category order), then by category
+        // Sort: User templates first, then by category and name
         return templates.sortedWith(
             compareByDescending<PosterTemplate> { it.id in userTemplateIds }
                 .thenBy { it.category }
